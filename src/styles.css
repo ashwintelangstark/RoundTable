@@ -70,42 +70,59 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --font-interview: var(--font-interview);
 }
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --font-interview: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+  --background: oklch(0.20 0.035 153);
+  --foreground: oklch(0.95 0.025 88);
+  --card: oklch(0.25 0.035 153);
+  --card-foreground: oklch(0.95 0.025 88);
+  --popover: oklch(0.25 0.035 153);
+  --popover-foreground: oklch(0.95 0.025 88);
+  --primary: oklch(0.75 0.12 77);
+  --primary-foreground: oklch(0.20 0.035 153);
+  --secondary: oklch(0.31 0.04 153);
+  --secondary-foreground: oklch(0.95 0.025 88);
+  --muted: oklch(0.29 0.035 153);
+  --muted-foreground: oklch(0.76 0.035 88);
+  --accent: oklch(0.37 0.06 153);
+  --accent-foreground: oklch(0.95 0.025 88);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.57 0.04 153 / 45%);
+  --input: oklch(0.57 0.04 153 / 60%);
+  --ring: oklch(0.75 0.12 77);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  --sidebar: oklch(0.25 0.035 153);
+  --sidebar-foreground: oklch(0.95 0.025 88);
+  --sidebar-primary: oklch(0.75 0.12 77);
+  --sidebar-primary-foreground: oklch(0.20 0.035 153);
+  --sidebar-accent: oklch(0.37 0.06 153);
+  --sidebar-accent-foreground: oklch(0.95 0.025 88);
+  --sidebar-border: oklch(0.57 0.04 153 / 45%);
+  --sidebar-ring: oklch(0.75 0.12 77);
+
+  /* Purpose-named material colors keep the 3D room aligned with the UI. */
+  --room-walnut: oklch(0.41 0.085 43);
+  --room-walnut-light: oklch(0.55 0.105 55);
+  --room-walnut-dark: oklch(0.28 0.055 45);
+  --room-brass: oklch(0.76 0.13 78);
+  --room-pine: oklch(0.31 0.065 151);
+  --room-pine-light: oklch(0.43 0.075 150);
+  --room-glass: oklch(0.67 0.085 207);
+  --room-rug: oklch(0.39 0.06 35);
+  --room-skin: oklch(0.72 0.095 57);
+  --room-ivory: oklch(0.95 0.03 88);
+  --room-suit: oklch(0.29 0.04 245);
+  --room-shirt: oklch(0.89 0.035 86);
+  --room-glass-back: oklch(0.76 0.075 194);
 }
 
 .dark {
@@ -151,5 +168,150 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+  }
+}
+
+.interview-shell {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  min-height: 580px;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-interview);
+}
+
+.interview-canvas {
+  position: absolute !important;
+  inset: 0;
+  z-index: 0;
+}
+
+.interview-topbar {
+  position: absolute;
+  z-index: 2;
+  inset: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 82px;
+  padding: 20px 32px;
+  pointer-events: none;
+}
+
+.interview-brand,
+.interview-presence {
+  display: flex;
+  align-items: center;
+}
+
+.interview-brand { gap: 12px; }
+
+.brand-mark {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  color: var(--primary);
+  border: 1px solid color-mix(in oklab, var(--primary) 50%, transparent);
+  border-radius: 4px;
+  background: color-mix(in oklab, var(--background) 72%, transparent);
+}
+
+.brand-copy { display: grid; gap: 2px; }
+.brand-name { font-size: 13px; font-weight: 700; }
+.brand-caption { color: var(--muted-foreground); font-size: 10px; }
+
+.interview-presence {
+  gap: 10px;
+  padding: 10px 13px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: color-mix(in oklab, var(--background) 82%, transparent);
+  font-size: 11px;
+  backdrop-filter: blur(12px);
+}
+
+.presence-dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--room-brass);
+  box-shadow: 0 0 12px color-mix(in oklab, var(--room-brass) 65%, transparent);
+}
+
+.interview-footer {
+  position: absolute;
+  z-index: 2;
+  bottom: 32px;
+  left: 32px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.footer-divider { width: 1px; height: 16px; background: var(--border); }
+.footer-count { color: var(--foreground); font-variant-numeric: tabular-nums; }
+
+.camera-panel {
+  position: absolute;
+  z-index: 3;
+  right: 28px;
+  bottom: 24px;
+  display: flex;
+  width: 274px;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: color-mix(in oklab, var(--background) 92%, transparent);
+  box-shadow: 0 16px 46px color-mix(in oklab, var(--background) 40%, transparent);
+  backdrop-filter: blur(16px);
+}
+
+.camera-panel-header {
+  display: flex;
+  min-height: 39px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+
+.camera-panel-title { display: flex; align-items: center; gap: 7px; }
+.camera-status { display: flex; align-items: center; gap: 6px; color: var(--muted-foreground); font-size: 10px; }
+.camera-view { position: relative; display: grid; aspect-ratio: 4 / 3; place-items: center; overflow: hidden; background: var(--accent); }
+.camera-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+.camera-empty { display: grid; place-items: center; gap: 9px; padding: 14px; text-align: center; }
+.camera-empty-icon { display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid var(--border); border-radius: 50%; color: var(--primary); }
+.camera-empty-copy { max-width: 190px; color: var(--muted-foreground); font-size: 10px; line-height: 1.5; }
+.camera-panel-action { display: flex; align-items: center; justify-content: space-between; min-height: 52px; gap: 8px; padding: 7px 10px; border-top: 1px solid var(--border); }
+.camera-panel-action .camera-enable { height: 32px; padding-inline: 11px; font-size: 10px; }
+.camera-error { padding: 0 10px 8px; color: var(--destructive); font-size: 10px; line-height: 1.4; }
+
+@media (max-width: 640px) {
+  .interview-shell { min-height: 560px; }
+  .interview-topbar { min-height: 68px; padding: 14px 14px; }
+  .brand-caption { font-size: 9px; }
+  .interview-presence { gap: 7px; padding: 8px 9px; font-size: 9px; }
+  .camera-panel { right: 14px; bottom: 66px; width: min(224px, 58vw); }
+  .camera-panel-header { min-height: 34px; padding: 0 9px; font-size: 10px; }
+  .camera-panel-action { min-height: 44px; }
+  .camera-empty { gap: 6px; padding: 9px; }
+  .camera-footer-label { display: none; }
+  .interview-footer { bottom: 20px; left: 16px; gap: 8px; font-size: 10px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .presence-dot { animation: room-ready-pulse 2.8s ease-in-out infinite; }
+  @keyframes room-ready-pulse {
+    50% { box-shadow: 0 0 16px color-mix(in oklab, var(--room-brass) 24%, transparent); }
   }
 }
