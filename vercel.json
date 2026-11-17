@@ -1,0 +1,27 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 60,
+      "memory": 3008,
+      "excludeFiles": "{node_modules/onnxruntime-node/bin/napi-v3/darwin/**,node_modules/onnxruntime-node/bin/napi-v3/win32/**,node_modules/onnxruntime-node/bin/napi-v3/linux/arm64/**,node_modules/@huggingface/transformers/.cache/**,server/storage/**,server/data/**,server/uploads/**}"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.ts"
+    },
+    {
+      "source": "/recordings/(.*)",
+      "destination": "/api/index.ts"
+    },
+    {
+      "source": "/((?!api/|recordings/|assets/|favicon|logo|.*\\..*).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
