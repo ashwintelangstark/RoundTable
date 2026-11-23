@@ -1,9 +1,4 @@
-import { env, pipeline } from "@huggingface/transformers";
 import { config } from "../config";
-
-if (config.isVercel) {
-  env.cacheDir = "/tmp/hf-cache";
-}
 
 const WHISPER_MODEL_ID = "Xenova/whisper-tiny.en";
 
@@ -93,10 +88,16 @@ class WhisperService {
     if (!this.asrPromise) {
       this.loading = true;
       this.lastError = null;
-      this.asrPromise = pipeline("automatic-speech-recognition", WHISPER_MODEL_ID, {
-        dtype: "q8",
-        device: "cpu",
-      })
+      this.asrPromise = (async () => {
+        const { env, pipeline } = await import("@huggingface/transformers");
+        if (config.hfCacheDir) {
+          env.cacheDir = config.hfCacheDir;
+        }
+        return pipeline("automatic-speech-recognition", WHISPER_MODEL_ID, {
+          dtype: "q8",
+          device: "cpu",
+        });
+      })()
         .then((instance) => {
           this.ready = true;
           this.loading = false;

@@ -1,10 +1,5 @@
-import { env } from "@huggingface/transformers";
-import { KokoroTTS } from "kokoro-js";
+import type { KokoroTTS } from "kokoro-js";
 import { config } from "../config";
-
-if (config.isVercel) {
-  env.cacheDir = "/tmp/hf-cache";
-}
 
 export type AgentVoiceProfile = {
   agent: "Nikhil" | "ananya" | "Daniel" | "sarah" | "Marcus";
@@ -137,10 +132,17 @@ class KokoroService {
     if (!this.ttsPromise) {
       this.loading = true;
       this.lastError = null;
-      this.ttsPromise = KokoroTTS.from_pretrained(MODEL_ID, {
-        dtype: config.kokoroDtype,
-        device: "cpu",
-      })
+      this.ttsPromise = (async () => {
+        if (config.hfCacheDir) {
+          const { env } = await import("@huggingface/transformers");
+          env.cacheDir = config.hfCacheDir;
+        }
+        const { KokoroTTS: KokoroTTSClass } = await import("kokoro-js");
+        return KokoroTTSClass.from_pretrained(MODEL_ID, {
+          dtype: config.kokoroDtype,
+          device: "cpu",
+        });
+      })()
         .then((instance) => {
           this.ready = true;
           this.loading = false;

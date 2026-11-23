@@ -1,10 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { AppRoutes } from "@/App";
+import { AuthProvider } from "@/components/AuthContext";
 import { ToastProvider } from "@/components/ToastContext";
+import type { AuthUser } from "@/lib/api";
 
 vi.mock("@react-three/fiber", () => ({
   Canvas: ({ children }: { children?: ReactNode }) => (
@@ -22,31 +24,56 @@ vi.mock("@react-three/fiber", () => ({
   }),
 }));
 
-vi.mock("@react-three/drei", () => ({
-  Environment: ({ children }: { children?: ReactNode }) => <>{children}</>,
-}));
-
 vi.mock("@/game/interview/room", () => ({
   InterviewRoom: () => <div data-testid="mock-interview-room" />,
 }));
 
-function renderRoute(initialEntry: string) {
+const MOCK_USER: AuthUser = {
+  id: 1,
+  name: "Ashwin Telang",
+  username: "Ashwin Telang",
+  email: "ashwin@gmail.com",
+  phone: "+91 98765 43210",
+  created_at: "2026-11-23T00:00:00.000Z",
+};
+
+function renderRoute(initialEntry: string, initialUser: AuthUser | null = MOCK_USER) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
   return render(
     <QueryClientProvider client={client}>
       <ToastProvider>
-        <MemoryRouter initialEntries={[initialEntry]}>
-          <AppRoutes />
-        </MemoryRouter>
+        <AuthProvider initialUser={initialUser}>
+          <MemoryRouter initialEntries={[initialEntry]}>
+            <AppRoutes />
+          </MemoryRouter>
+        </AuthProvider>
       </ToastProvider>
     </QueryClientProvider>,
   );
 }
 
-describe("RoundTable unified routing across Overview and all 7 sections", () => {
-  it("renders Overview at / with RoundTable branding and all 5 panel agents", () => {
+describe("RoundTable Authentication Gate & Unified Routing", () => {
+  it("shows the Authentication page (Login & Sign Up with Name, Gmail, Phone, Password) before accessing the web app", () => {
+    renderRoute("/", null);
+
+    // Login tab shown initially
+    expect(screen.getByText(/Sign in to RoundTable/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Username$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Access RoundTable/i })).toBeInTheDocument();
+
+    // Switch to Sign Up tab and verify all required fields
+    fireEvent.click(screen.getByRole("tab", { name: /Sign Up/i }));
+    expect(screen.getByLabelText(/Full Name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Gmail/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Phone Number/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Create Account/i })).toBeInTheDocument();
+  });
+
+  it("renders Overview at / with RoundTable branding, signed-in user info, sign out, and all 5 panel agents", () => {
     renderRoute("/");
     expect(screen.getAllByText(/RoundTable/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText("Nikhil").length).toBeGreaterThan(0);
@@ -54,6 +81,8 @@ describe("RoundTable unified routing across Overview and all 7 sections", () => 
     expect(screen.getAllByText("Daniel").length).toBeGreaterThan(0);
     expect(screen.getAllByText("sarah").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Marcus").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Ashwin Telang").length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: /Sign out/i }).length).toBeGreaterThan(0);
   });
 
   it("renders Interview Registration section at /registration", () => {

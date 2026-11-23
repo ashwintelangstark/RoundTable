@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Edit3, Play, RefreshCw, Trash2, UploadCloud } from "lucide-react";
 import { useId, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/components/AuthContext";
 import { ModalDialog } from "@/components/ModalDialog";
 import { useToast } from "@/components/ToastContext";
 import { api, type InterviewSession } from "@/lib/api";
@@ -16,10 +17,11 @@ export function RegistrationPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { notify } = useToast();
+  const { user } = useAuth();
   const formHeadingId = useId();
 
-  const [candidateName, setCandidateName] = useState("");
-  const [email, setEmail] = useState("");
+  const [candidateName, setCandidateName] = useState(user?.name ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
   const [companyName, setCompanyName] = useState("");
   const [role, setRole] = useState("");
   const [companyDesc, setCompanyDesc] = useState("");

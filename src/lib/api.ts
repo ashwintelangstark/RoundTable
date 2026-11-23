@@ -1,5 +1,49 @@
 import type { PanelAgentName } from "@/game/interview/team";
 
+export interface AuthUser {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+  phone: string;
+  created_at: string;
+}
+
+export interface SignupEmailNotification {
+  sent: boolean;
+  mode: "resend" | "smtp" | "preview";
+  to: string;
+  subject: string;
+  message: string;
+  previewText?: string;
+}
+
+const AUTH_TOKEN_KEY = "rt_auth_token";
+
+export function getStoredAuthToken(): string | null {
+  try {
+    return window.localStorage.getItem(AUTH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredAuthToken(token: string): void {
+  try {
+    window.localStorage.setItem(AUTH_TOKEN_KEY, token);
+  } catch {
+    // Ignore storage unavailability
+  }
+}
+
+export function clearStoredAuthToken(): void {
+  try {
+    window.localStorage.removeItem(AUTH_TOKEN_KEY);
+  } catch {
+    // Ignore storage unavailability
+  }
+}
+
 export interface InterviewRecordingRow {
   id: number;
   interview_id: number;
@@ -135,7 +179,16 @@ export interface PanelStreamDoneEvent {
 }
 
 async function apiJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, init);
+  const token = getStoredAuthToken();
+  const headers = new Headers(init?.headers ?? undefined);
+  if (token && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+  const res = await fetch(url, {
+    ...init,
+    headers,
+    credentials: init?.credentials ?? "include",
+  });
   const text = await res.text();
   let parsed: unknown;
   try {
@@ -151,10 +204,44 @@ async function apiJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  signup: (payload: { name: string; email: string; phone: string; password: string }) =>
+    apiJson<{
+      ok: boolean;
+      user: AuthUser;
+      emailNotification: SignupEmailNotification;
+    }>("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }),
+
+  login: (payload: { username: string; password: string }) =>
+    apiJson<{
+      ok: boolean;
+      token: string;
+      user: AuthUser;
+    }>("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }),
+
+  me: () =>
+    apiJson<{
+      authenticated: boolean;
+      user: AuthUser | null;
+    }>("/api/auth/me"),
+
+  logout: () =>
+    apiJson<{ ok: boolean }>("/api/auth/logout", {
+      method: "POST",
+    }),
+
   health: () =>
     apiJson<{
       ok: boolean;
       database: string;
+      mailConfigured?: boolean;
       kokoro: { ready: boolean; loading: boolean; error: string | null };
       opencv: { ready: boolean; opencvVersion: string };
       openrouterConfigured: boolean;

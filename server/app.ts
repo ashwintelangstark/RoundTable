@@ -23,7 +23,25 @@ import {
   type InterviewRecord,
   type MessageRecord,
 } from "./services/agents";
+import {
+  ACCOUNT_VAULT_COOKIE_NAME,
+  clearSessionCookie,
+  createAuthToken,
+  decryptAccountVault,
+  extractTokenFromRequest,
+  hashPassword,
+  loginSchema,
+  parseCookieHeader,
+  sanitizeUser,
+  setAccountVaultCookie,
+  setSessionCookie,
+  signupSchema,
+  verifyAuthToken,
+  verifyPassword,
+  type UserDbRow,
+} from "./services/auth";
 import { kokoroService } from "./services/kokoro";
+import { isMailProviderConfigured, sendStaticWelcomeEmail } from "./services/mailer";
 import { openCvService } from "./services/opencv";
 import { extractResumeText } from "./services/resumeParser";
 import { whisperService } from "./services/whisper";
@@ -42,7 +60,7 @@ const uploadRecording = multer({
   limits: { fileSize: 100 * 1024 * 1024 },
 });
 
-app.use(cors());
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "16mb" }));
 
 fs.mkdirSync(config.recordingsDir, { recursive: true });
@@ -55,11 +73,218 @@ app.get("/api/health", (_req, res) => {
     database: "sqlite",
     vercel: config.isVercel,
     blobStorageConfigured: Boolean(config.blobReadWriteToken),
+    mailConfigured: isMailProviderConfigured(),
     kokoro: kokoroService.getStatus(),
     whisper: whisperService.getStatus(),
     opencv: openCvService.getStatus(),
     openrouterConfigured: Boolean(config.openrouterApiKey),
   });
+});
+
+// ---------------------------------------------------------------------------
+// Authentication (Sign Up + Static Welcome Email + Username/Password Login)
+// ---------------------------------------------------------------------------
+app.post("/api/auth/signup", async (req, res) => {
+  try {
+    const parsed = signupSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const firstError = parsed.error.issues[0]?.message ?? "Please check your sign-up details.";
+      res.status(400).json({ error: firstError });
+      return;
+    }
+
+    const { name, email, phone, password } = parsed.data;
+    const existing = db
+      .prepare("SELECT id FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1")
+      .get(email) as { id: number } | undefined;
+
+    if (existing) {
+      res
+        .status(409)
+        .json({ error: "An account with this Gmail already exists. Please log in instead." });
+      return;
+    }
+
+    const passwordHash = hashPassword(password);
+    const username = name;
+
+    const inserted = db
+      .prepare(
+        `
+        INSERT INTO users (name, username, email, phone, password_hash)
+        VALUES (?, ?, ?, ?, ?)
+      `,
+      )
+      .run(name, username, email, phone, passwordHash);
+
+    const userRow = db
+      .prepare("SELECT * FROM users WHERE id = ?")
+      .get(Number(inserted.lastInsertRowid)) as unknown as UserDbRow;
+
+    // Keep an encrypted HttpOnly vault cookie so serverless cold starts preserve newly created accounts
+    setAccountVaultCookie(res, {
+      name: userRow.name,
+      username: userRow.username,
+      email: userRow.email,
+      phone: userRow.phone,
+      password_hash: userRow.password_hash,
+      created_at: userRow.created_at,
+    });
+
+    const emailResult = await sendStaticWelcomeEmail({
+      name: userRow.name,
+      email: userRow.email,
+      phone: userRow.phone,
+    });
+
+    db.prepare(
+      `
+      INSERT INTO email_logs (user_id, recipient_email, subject, body_text, delivery_mode, delivered, error_message)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `,
+    ).run(
+      userRow.id,
+      emailResult.to,
+      emailResult.subject,
+      emailResult.bodyText,
+      emailResult.mode,
+      emailResult.sent ? 1 : 0,
+      emailResult.error ?? null,
+    );
+
+    res.status(201).json({
+      ok: true,
+      user: sanitizeUser(userRow),
+      emailNotification: {
+        sent: emailResult.sent,
+        mode: emailResult.mode,
+        to: emailResult.to,
+        subject: emailResult.subject,
+        message: emailResult.message,
+        previewText: emailResult.bodyText,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err instanceof Error ? err.message : "Failed to create account.",
+    });
+  }
+});
+
+app.post("/api/auth/login", (req, res) => {
+  try {
+    const parsed = loginSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const firstError = parsed.error.issues[0]?.message ?? "Username and password are required.";
+      res.status(400).json({ error: firstError });
+      return;
+    }
+
+    const { username, password } = parsed.data;
+    const candidates = db
+      .prepare(
+        `
+        SELECT * FROM users
+        WHERE LOWER(username) = LOWER(?)
+           OR LOWER(name) = LOWER(?)
+           OR LOWER(email) = LOWER(?)
+        ORDER BY id DESC
+      `,
+      )
+      .all(username, username, username) as unknown as UserDbRow[];
+
+    let matched = candidates.find((row) => verifyPassword(password, row.password_hash));
+
+    // Rehydrate from signed encrypted vault cookie if a serverless cold start reset /tmp SQLite
+    if (!matched) {
+      const cookies = parseCookieHeader(req.headers["cookie"]);
+      const vaultUser = decryptAccountVault(cookies[ACCOUNT_VAULT_COOKIE_NAME]);
+      if (vaultUser) {
+        const needle = username.toLowerCase();
+        const identifierMatches =
+          vaultUser.username.toLowerCase() === needle ||
+          vaultUser.name.toLowerCase() === needle ||
+          vaultUser.email.toLowerCase() === needle;
+
+        if (identifierMatches && verifyPassword(password, vaultUser.password_hash)) {
+          const existingByEmail = db
+            .prepare("SELECT * FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1")
+            .get(vaultUser.email) as unknown as UserDbRow | undefined;
+
+          if (existingByEmail) {
+            matched = existingByEmail;
+          } else {
+            const reinserted = db
+              .prepare(
+                `
+                INSERT INTO users (name, username, email, phone, password_hash, created_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+              `,
+              )
+              .run(
+                vaultUser.name,
+                vaultUser.username,
+                vaultUser.email,
+                vaultUser.phone,
+                vaultUser.password_hash,
+                vaultUser.created_at,
+              );
+            matched = db
+              .prepare("SELECT * FROM users WHERE id = ?")
+              .get(Number(reinserted.lastInsertRowid)) as unknown as UserDbRow;
+          }
+        }
+      }
+    }
+
+    if (!matched) {
+      res.status(401).json({ error: "Invalid username or password." });
+      return;
+    }
+
+    const safeUser = sanitizeUser(matched);
+    const token = createAuthToken(safeUser);
+    setSessionCookie(res, token);
+
+    res.json({
+      ok: true,
+      token,
+      user: safeUser,
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err instanceof Error ? err.message : "Failed to sign in.",
+    });
+  }
+});
+
+app.get("/api/auth/me", (req, res) => {
+  const token = extractTokenFromRequest(req);
+  if (!token) {
+    res.status(401).json({ authenticated: false, user: null });
+    return;
+  }
+  const tokenUser = verifyAuthToken(token);
+  if (!tokenUser) {
+    clearSessionCookie(res);
+    res.status(401).json({ authenticated: false, user: null });
+    return;
+  }
+
+  // Prefer fresh DB row if present; fall back to verified stateless token claims across serverless cold starts
+  const dbRow = db
+    .prepare("SELECT * FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1")
+    .get(tokenUser.email) as unknown as UserDbRow | undefined;
+
+  res.json({
+    authenticated: true,
+    user: dbRow ? sanitizeUser(dbRow) : tokenUser,
+  });
+});
+
+app.post("/api/auth/logout", (_req, res) => {
+  clearSessionCookie(res);
+  res.json({ ok: true });
 });
 
 // ---------------------------------------------------------------------------

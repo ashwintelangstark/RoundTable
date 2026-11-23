@@ -8,6 +8,7 @@ import {
   FileCheck2,
   HeartHandshake,
   LayoutDashboard,
+  LogOut,
   Menu,
   PanelLeft,
   PanelLeftClose,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/components/AuthContext";
 import { api } from "@/lib/api";
 
 const WORKSPACE_LINKS = [
@@ -75,6 +77,19 @@ function SidebarNavContent({
   pathname: string;
   onNavigate?: () => void;
 }) {
+  const { user, logout } = useAuth();
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function handleLogout() {
+    setSigningOut(true);
+    try {
+      await logout();
+      onNavigate?.();
+    } finally {
+      setSigningOut(false);
+    }
+  }
+
   return (
     <>
       <div className="flex items-center justify-between pb-3 mb-2 border-b border-white/40">
@@ -146,16 +161,32 @@ function SidebarNavContent({
       </nav>
 
       <div className="rt-side-bottom">
-        <div className="rt-glass-inset p-2.5 flex items-center gap-2.5 rounded-2xl">
-          <div className="grid h-8 w-8 place-items-center rounded-xl bg-[#526e50]/20 border border-white/60 text-[#2b442b] shrink-0">
-            <Briefcase size={15} aria-hidden="true" />
-          </div>
-          <div className="min-w-0">
-            <div className="text-xs font-semibold truncate text-[#1c2c1e]">Candidate Studio</div>
-            <div className="text-[10px] text-[#637562] truncate">
-              Candidate Studio · Live AI Pipeline
+        <div className="rt-glass-inset p-2.5 flex items-center justify-between gap-2 rounded-2xl">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="grid h-8 w-8 place-items-center rounded-xl bg-[#526e50]/20 border border-white/60 text-[#2b442b] shrink-0">
+              <Briefcase size={15} aria-hidden="true" />
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs font-semibold truncate text-[#1c2c1e]">
+                {user?.name || "Candidate Studio"}
+              </div>
+              <div className="text-[10px] text-[#637562] truncate">
+                {user?.email || "Candidate Studio · Live AI Pipeline"}
+              </div>
             </div>
           </div>
+          {user && (
+            <button
+              type="button"
+              onClick={handleLogout}
+              disabled={signingOut}
+              aria-label="Sign out"
+              title="Sign out"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/55 border border-white/80 text-[#3c503d] hover:bg-white/90 hover:text-[#8b3027] transition-colors"
+            >
+              <LogOut size={14} aria-hidden="true" />
+            </button>
+          )}
         </div>
       </div>
     </>
