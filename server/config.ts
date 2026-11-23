@@ -20,6 +20,14 @@ const smtpHost =
   (process.env["SMTP_HOST"] ?? "").trim() ||
   (smtpUser.toLowerCase().endsWith("@gmail.com") ? "smtp.gmail.com" : "");
 
+const rawDbPath = path.resolve(
+  writableRoot,
+  process.env["DATABASE_PATH"] ??
+    (isVercel ? "data/roundtable.sqlite" : "./server/data/roundtable.sqlite"),
+);
+const databasePath =
+  isVercel && !rawDbPath.startsWith("/tmp/") ? "/tmp/roundtable/data/roundtable.sqlite" : rawDbPath;
+
 export const config = {
   isVercel,
   port: Number(process.env["PORT"] ?? 3001),
@@ -27,11 +35,7 @@ export const config = {
   openrouterModel: process.env["OPENROUTER_MODEL"] ?? "nvidia/nemotron-3.5-lightning:free",
   openrouterFallbackModel:
     process.env["OPENROUTER_FALLBACK_MODEL"] ?? "cohere/north-mini-code:free",
-  databasePath: path.resolve(
-    writableRoot,
-    process.env["DATABASE_PATH"] ??
-      (isVercel ? "data/roundtable.sqlite" : "./server/data/roundtable.sqlite"),
-  ),
+  databasePath,
   kokoroDtype: (process.env["KOKORO_DTYPE"] ?? "q8") as "fp32" | "fp16" | "q8" | "q4",
   uploadsDir: path.resolve(
     writableRoot,

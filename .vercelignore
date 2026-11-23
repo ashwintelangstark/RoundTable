@@ -1,4 +1,4 @@
-# Exclude local runtime data, recordings, build caches, docs, and duplicate assets from Vercel uploads
+# Exclude local runtime data, recordings, build caches, docs, and duplicate root asset from Vercel uploads
 .env
 .env.*
 !.env.example
@@ -11,6 +11,6 @@ server/data
 server/storage
 server/uploads
 docs
-logo.png
+/logo.png
 *.log
 .DS_Store

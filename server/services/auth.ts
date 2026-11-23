@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import type { Request, Response } from "express";
 import { z } from "zod";
-import { config } from "../config";
+import { config } from "../config.js";
 
 export const SESSION_COOKIE_NAME = "rt_session";
 export const ACCOUNT_VAULT_COOKIE_NAME = "rt_acct_vault";

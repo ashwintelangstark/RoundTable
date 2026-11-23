@@ -1,11 +1,11 @@
 import express from "express";
 import fs from "node:fs";
 import path from "node:path";
-import { app } from "./app";
-import { config } from "./config";
-import { kokoroService } from "./services/kokoro";
-import { openCvService } from "./services/opencv";
-import { whisperService } from "./services/whisper";
+import { app } from "./app.js";
+import { config } from "./config.js";
+import { kokoroService } from "./services/kokoro.js";
+import { openCvService } from "./services/opencv.js";
+import { whisperService } from "./services/whisper.js";
 
 // Warm up neural speech, local STT, and OpenCV vision workers in persistent Node mode
 if (!config.isVercel) {

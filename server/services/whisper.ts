@@ -1,4 +1,4 @@
-import { config } from "../config";
+import { config } from "../config.js";
 
 const WHISPER_MODEL_ID = "Xenova/whisper-tiny.en";
 

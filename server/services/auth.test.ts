@@ -4,8 +4,8 @@ import type { Socket } from "node:net";
 import { Duplex } from "node:stream";
 import type { Request, Response } from "express";
 import { afterAll, describe, expect, it } from "vitest";
-import { app } from "../app";
-import { db } from "../db";
+import { app } from "../app.js";
+import { db } from "../db.js";
 import {
   createAuthToken,
   decryptAccountVault,
@@ -13,8 +13,8 @@ import {
   hashPassword,
   verifyAuthToken,
   verifyPassword,
-} from "./auth";
-import { buildStaticWelcomeEmail } from "./mailer";
+} from "./auth.js";
+import { buildStaticWelcomeEmail } from "./mailer.js";
 
 interface MockResponseResult {
   status: number;

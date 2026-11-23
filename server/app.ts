@@ -5,8 +5,8 @@ import fs from "node:fs";
 import dns from "node:dns";
 import path from "node:path";
 import multer from "multer";
-import { config } from "./config";
-import { db, listRecordingsForInterviewJob, markDemoSeedDismissed } from "./db";
+import { config } from "./config.js";
+import { db, listRecordingsForInterviewJob, markDemoSeedDismissed } from "./db.js";
 import {
   analyzeResumeWithAnanya,
   buildOpeningGreeting,
@@ -22,7 +22,7 @@ import {
   type CvAggregate,
   type InterviewRecord,
   type MessageRecord,
-} from "./services/agents";
+} from "./services/agents.js";
 import {
   ACCOUNT_VAULT_COOKIE_NAME,
   clearSessionCookie,
@@ -39,12 +39,12 @@ import {
   verifyAuthToken,
   verifyPassword,
   type UserDbRow,
-} from "./services/auth";
-import { kokoroService } from "./services/kokoro";
-import { isMailProviderConfigured, sendStaticWelcomeEmail } from "./services/mailer";
-import { openCvService } from "./services/opencv";
-import { extractResumeText } from "./services/resumeParser";
-import { whisperService } from "./services/whisper";
+} from "./services/auth.js";
+import { kokoroService } from "./services/kokoro.js";
+import { isMailProviderConfigured, sendStaticWelcomeEmail } from "./services/mailer.js";
+import { openCvService } from "./services/opencv.js";
+import { extractResumeText } from "./services/resumeParser.js";
+import { whisperService } from "./services/whisper.js";
 
 dns.setDefaultResultOrder("ipv4first");
 

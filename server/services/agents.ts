@@ -3,7 +3,7 @@ import {
   callOpenRouterJson,
   callOpenRouterStream,
   type ChatMessage,
-} from "./openrouter";
+} from "./openrouter.js";
 
 export interface InterviewRecord {
   id: number;

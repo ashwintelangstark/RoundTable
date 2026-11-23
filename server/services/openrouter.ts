@@ -1,5 +1,5 @@
 import dns from "node:dns";
-import { config } from "../config";
+import { config } from "../config.js";
 
 dns.setDefaultResultOrder("ipv4first");
 

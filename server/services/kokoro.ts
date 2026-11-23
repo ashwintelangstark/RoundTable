@@ -1,5 +1,5 @@
 import type { KokoroTTS } from "kokoro-js";
-import { config } from "../config";
+import { config } from "../config.js";
 
 export type AgentVoiceProfile = {
   agent: "Nikhil" | "ananya" | "Daniel" | "sarah" | "Marcus";

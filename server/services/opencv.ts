@@ -2,7 +2,7 @@ import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import crypto from "node:crypto";
 import path from "node:path";
 import readline from "node:readline";
-import { config } from "../config";
+import { config } from "../config.js";
 
 export interface CvAnalysisResult {
   face_detected: boolean;
