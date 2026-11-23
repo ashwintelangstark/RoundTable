@@ -142,9 +142,24 @@ export function AuthPage() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col justify-center py-6 sm:py-10">
+    <div className="relative min-h-dvh flex flex-col justify-center py-6 sm:py-10 overflow-x-clip">
+      {/* Full-Viewport Looping Background Video behind Login & Sign Up */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <video
+          className="rt-auth-bg-video w-full h-full object-cover scale-[1.02]"
+          src="/RoundTable.mp4"
+          poster="/botanical-wallpaper.jpg"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#e9f0e7]/42 via-[#dbe7d9]/28 to-[#1a2d1d]/36 backdrop-blur-[2px]" />
+      </div>
+
       {/* Subtle Top Return Bar */}
-      <div className="rt-landing-container mb-5 flex items-center justify-between gap-3 rt-auth-card-fade">
+      <div className="relative z-10 rt-landing-container mb-5 flex items-center justify-between gap-3 rt-auth-card-fade">
         <Link
           to="/"
           className="rt-pill no-underline hover:bg-white/85 transition-colors inline-flex items-center gap-1.5"
@@ -165,9 +180,9 @@ export function AuthPage() {
         </div>
       </div>
 
-      <div className="rt-landing-container grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        {/* Left Glass Brand & 5-Agent Showcase with Fade Entrance */}
-        <section className="rt-glass-hero rt-auth-card-fade lg:col-span-6 p-7 sm:p-9 flex flex-col justify-between gap-6">
+      <div className="relative z-10 rt-landing-container grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-stretch">
+        {/* Left Glass Brand & 5-Agent Showcase with Fade Entrance (below form on small phones) */}
+        <section className="rt-glass-hero rt-auth-card-fade order-2 lg:order-1 lg:col-span-6 p-6 sm:p-8 lg:p-9 flex flex-col justify-between gap-6">
           <div>
             <div className="flex items-center gap-3.5 mb-7">
               <div className="rt-brand-badge">
@@ -232,8 +247,8 @@ export function AuthPage() {
           </div>
         </section>
 
-        {/* Right Glass Authentication Card with Smooth Staggered Fade Transition */}
-        <section className="rt-card rt-auth-card-fade-delay lg:col-span-6 p-7 sm:p-9 flex flex-col justify-center">
+        {/* Right Glass Authentication Card with Smooth Staggered Fade Transition (first on phones) */}
+        <section className="rt-card rt-auth-card-fade-delay order-1 lg:order-2 lg:col-span-6 p-6 sm:p-8 lg:p-9 flex flex-col justify-center">
           <div className="mb-6">
             <div className="rt-eyebrow mb-1">
               {mode === "login" ? "Member Access" : "Create Your Studio Account"}

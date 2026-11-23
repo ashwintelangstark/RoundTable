@@ -1649,7 +1649,7 @@ export function InteractiveAgentShowcaseCanvas({
 
   return (
     <div
-      className="relative w-full h-[330px] sm:h-[360px] rt-agent-3d-stage overflow-hidden select-none cursor-grab active:cursor-grabbing"
+      className="relative w-full h-[270px] sm:h-[340px] lg:h-[360px] xl:h-[390px] 2xl:h-[440px] rt-agent-3d-stage overflow-hidden select-none cursor-grab active:cursor-grabbing touch-none"
       onPointerDown={(e) => {
         dragRotationRef.current.isDragging = true;
         dragStartRef.current = {

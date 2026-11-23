@@ -331,7 +331,7 @@ export function ReadinessPage() {
         <div className="flex flex-wrap items-center gap-2">
           <select
             aria-label="Select interview report"
-            className="rt-control !w-auto min-w-[230px] !min-h-9 text-xs font-medium"
+            className="rt-control w-full sm:!w-auto sm:min-w-[230px] max-w-full !min-h-9 text-xs font-medium"
             value={String(active.interview_id)}
             onChange={(e) => handleSelectInterview(Number(e.target.value))}
           >

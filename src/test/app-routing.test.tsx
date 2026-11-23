@@ -90,9 +90,11 @@ describe("RoundTable Landing Pages, Authentication Gate & Unified Routing", () =
     benefitsView.unmount();
   });
 
-  it("renders Login & Sign Up at /login with Name, Gmail, Phone Number, Password and card fade transition", () => {
-    renderRoute("/login", null);
+  it("renders Login & Sign Up at /login with background video, Name, Gmail, Phone Number, Password and card fade transition", () => {
+    const { container } = renderRoute("/login", null);
 
+    const bgVideo = container.querySelector('video[src="/RoundTable.mp4"]');
+    expect(bgVideo).not.toBeNull();
     expect(screen.getByText(/Sign in to RoundTable/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Username$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();

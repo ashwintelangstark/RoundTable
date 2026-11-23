@@ -38,6 +38,7 @@
 html,
 body {
   margin: 0;
+  overflow-x: clip;
   background-color: #dbe5d8;
   background-image:
     radial-gradient(1100px 750px at 85% 15%, rgba(255, 255, 245, 0.45) 0%, transparent 65%),
@@ -56,7 +57,16 @@ body {
     sans-serif;
   font-size: 14px;
   line-height: 1.5;
-  min-block-size: 100vh;
+  min-block-size: 100dvh;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Mobile Safari/Android fixed-background smoothness */
+@media (hover: none) and (pointer: coarse) {
+  html,
+  body {
+    background-attachment: scroll;
+  }
 }
 
 button,
@@ -928,8 +938,8 @@ dialog.rt-drawer::backdrop {
     inset 0 1px 2px #ffffff;
 }
 
-/* Responsive Breakpoints */
-@media (max-width: 960px) {
+/* Responsive Breakpoints — Phones, Foldables, Tablets, Monitors & 2K/4K/8K Smart TVs */
+@media (max-width: 1024px) {
   .rt-sidebar {
     display: none;
   }
@@ -941,11 +951,132 @@ dialog.rt-drawer::backdrop {
   .rt-main {
     margin-inline-start: 0;
     inline-size: 100%;
-    padding: 18px 16px 38px;
+    padding: 16px max(16px, env(safe-area-inset-right)) max(38px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
   }
 
   .rt-mobile-menu-btn {
     display: inline-flex;
+  }
+}
+
+/* Compact & Standard Smartphones (320px–520px, including notched screens) */
+@media (max-width: 520px) {
+  .rt-topbar {
+    padding: 12px 14px;
+    border-radius: 20px;
+    gap: 10px;
+  }
+
+  .rt-card {
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  .rt-glass-hero {
+    border-radius: 22px;
+  }
+
+  .rt-landing-nav {
+    padding: 8px 10px 8px 12px;
+    gap: 8px;
+  }
+
+  .rt-btn {
+    min-block-size: 42px;
+  }
+
+  dialog.rt-dialog {
+    padding: 18px;
+    border-radius: 22px;
+    inline-size: calc(100dvw - 20px);
+  }
+}
+
+/* Safe-Area Insets for Modern Phones (Dynamic Island / Gesture Bar) */
+@supports (padding: max(0px)) {
+  .rt-landing-header {
+    padding-block-start: max(12px, env(safe-area-inset-top));
+  }
+
+  .rt-toast-region {
+    inset-block-end: max(20px, env(safe-area-inset-bottom));
+    inset-inline-end: max(16px, env(safe-area-inset-right));
+  }
+}
+
+/* Large Desktop Monitors & 2K Displays (1920px–2559px) */
+@media (min-width: 1920px) {
+  html {
+    font-size: 17px;
+  }
+
+  body {
+    font-size: 15.5px;
+  }
+
+  .rt-sidebar {
+    inline-size: 280px;
+  }
+
+  .rt-main {
+    margin-inline-start: 316px;
+    inline-size: calc(100% - 316px);
+    max-inline-size: 2200px;
+    padding: 22px 36px 56px;
+  }
+}
+
+/* 4K Monitors, Ultrawides & Smart TVs (2560px–3399px) */
+@media (min-width: 2560px) {
+  html {
+    font-size: 19px;
+  }
+
+  body {
+    font-size: 17.5px;
+  }
+
+  .rt-sidebar {
+    inline-size: 310px;
+    padding: 24px 18px;
+  }
+
+  .rt-main {
+    margin-inline-start: 350px;
+    inline-size: calc(100% - 350px);
+    max-inline-size: 2800px;
+    padding: 28px 48px 64px;
+  }
+
+  .rt-btn {
+    min-block-size: 48px;
+    padding: 12px 26px;
+  }
+
+  .rt-control {
+    min-block-size: 48px;
+  }
+}
+
+/* Large 4K / 8K Living-Room TVs (3400px+) */
+@media (min-width: 3400px) {
+  html {
+    font-size: 22px;
+  }
+
+  body {
+    font-size: 20px;
+  }
+
+  .rt-sidebar {
+    inline-size: 350px;
+  }
+
+  .rt-main {
+    margin-inline-start: 394px;
+    inline-size: calc(100% - 394px);
+    max-inline-size: 3400px;
   }
 }
 
@@ -974,22 +1105,29 @@ html {
   inset-block-start: 14px;
   z-index: 40;
   inline-size: 85vw;
-  max-inline-size: 1920px;
+  max-inline-size: 3200px;
   margin-inline: auto;
   padding-inline: 0;
 }
 
 .rt-landing-container {
   inline-size: 85vw;
-  max-inline-size: 1920px;
+  max-inline-size: 3200px;
   margin-inline: auto;
 }
 
 @media (max-width: 768px) {
   .rt-landing-header,
   .rt-landing-container {
-    inline-size: calc(100% - 24px);
+    inline-size: calc(100% - max(24px, env(safe-area-inset-left) + env(safe-area-inset-right)));
   }
+}
+
+/* TV Remote / D-Pad & Keyboard High-Visibility Focus */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--sage-dark);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.7);
 }
 
 .rt-landing-nav {

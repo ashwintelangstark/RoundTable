@@ -155,7 +155,7 @@ export function LandingBenefitsPage() {
             </div>
 
             <div className="table-wrapper">
-              <table className="rt-table">
+              <table className="rt-table responsive">
                 <thead>
                   <tr>
                     <th>Preparation Dimension</th>
@@ -166,9 +166,13 @@ export function LandingBenefitsPage() {
                 <tbody>
                   {COMPARISON_ROWS.map((row) => (
                     <tr key={row.dimension}>
-                      <td className="font-semibold text-[#1c2c1e]">{row.dimension}</td>
-                      <td className="text-[#5d6c5c]">{row.alone}</td>
-                      <td className="text-[#1f3b22] font-medium">
+                      <td data-label="Dimension" className="font-semibold text-[#1c2c1e]">
+                        {row.dimension}
+                      </td>
+                      <td data-label="Preparing Alone" className="text-[#5d6c5c]">
+                        {row.alone}
+                      </td>
+                      <td data-label="With RoundTable" className="text-[#1f3b22] font-medium">
                         <span className="inline-flex items-start gap-2">
                           <CheckCircle2
                             size={14}

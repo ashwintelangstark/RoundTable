@@ -1262,10 +1262,7 @@ export function InterviewRoomPage() {
       </div>
 
       {/* FULL-SCREEN 3D VIRTUAL INTERVIEW ROOM (Far-view perspective) */}
-      <div
-        className="relative w-full rounded-[24px] overflow-hidden border border-[#cdd7c2] bg-[#1a231d] shadow-2xl"
-        style={{ height: "calc(100vh - 150px)", minHeight: "600px" }}
-      >
+      <div className="relative w-full rounded-[20px] sm:rounded-[24px] overflow-hidden border border-[#cdd7c2] bg-[#1a231d] shadow-2xl h-[74dvh] min-h-[440px] sm:h-[calc(100dvh-150px)] sm:min-h-[560px] 2xl:min-h-[680px]">
         <Canvas
           className="absolute inset-0"
           shadows
@@ -1743,8 +1740,8 @@ export function InterviewRoomPage() {
 
         {/* BOTTOM-RIGHT CANDIDATE VISION PIP */}
         <section
-          className={`absolute right-4 bottom-18 sm:bottom-4 z-20 rounded-2xl overflow-hidden border border-white/25 bg-[#1b251d]/90 text-[#f5f4e6] backdrop-blur-xl shadow-[0_24px_60px_-10px_rgba(0,0,0,0.45),_inset_0_1px_1.5px_rgba(255,255,255,0.2)] transition-all ${
-            cvWindowMinimized ? "w-44" : "w-52 sm:w-64"
+          className={`absolute right-3 sm:right-4 bottom-20 sm:bottom-4 z-20 rounded-2xl overflow-hidden border border-white/25 bg-[#1b251d]/90 text-[#f5f4e6] backdrop-blur-xl shadow-[0_24px_60px_-10px_rgba(0,0,0,0.45),_inset_0_1px_1.5px_rgba(255,255,255,0.2)] transition-all ${
+            cvWindowMinimized ? "w-36 sm:w-44" : "w-40 sm:w-60 xl:w-72"
           }`}
           aria-label="Candidate live vision & behavioral analysis"
         >

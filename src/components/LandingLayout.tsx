@@ -57,10 +57,10 @@ export function LandingLayout({ title, children }: { title: string; children: Re
               />
             </div>
             <div>
-              <span className="font-serif-display text-lg font-semibold tracking-tight block leading-none">
+              <span className="font-serif-display text-base sm:text-lg font-semibold tracking-tight block leading-none">
                 RoundTable
               </span>
-              <span className="text-[8px] tracking-[1.8px] uppercase font-bold text-[#526e50] block mt-0.5">
+              <span className="hidden sm:block text-[8px] tracking-[1.8px] uppercase font-bold text-[#526e50] mt-0.5">
                 Career Studio
               </span>
             </div>
@@ -84,8 +84,11 @@ export function LandingLayout({ title, children }: { title: string; children: Re
           </div>
 
           {/* Top-Right Explore RoundTable CTA + Mobile Trigger */}
-          <div className="flex items-center gap-2">
-            <Link to="/login" className="rt-btn !py-2 !px-4 !text-xs !min-h-[38px]">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <Link
+              to="/login"
+              className="rt-btn !py-2 !px-3 sm:!px-4 !text-[11px] sm:!text-xs !min-h-[38px] whitespace-nowrap"
+            >
               <span>Explore RoundTable</span>
               <ArrowUpRight size={14} aria-hidden="true" />
             </Link>
