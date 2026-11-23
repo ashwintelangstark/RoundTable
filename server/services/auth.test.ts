@@ -14,7 +14,6 @@ import {
   verifyAuthToken,
   verifyPassword,
 } from "./auth.js";
-import { buildStaticWelcomeEmail } from "./mailer.js";
 
 interface MockResponseResult {
   status: number;
@@ -104,7 +103,7 @@ function invokeApp(opts: {
   });
 }
 
-describe("RoundTable Auth, Account Vault & Static Welcome Mailer", () => {
+describe("RoundTable Auth & Account Vault", () => {
   const testEmail = `rt_auth_test_${Date.now()}@gmail.com`;
   const testName = "RoundTable Test Candidate";
   const testPhone = "+91 98765 11223";
@@ -152,21 +151,7 @@ describe("RoundTable Auth, Account Vault & Static Welcome Mailer", () => {
     expect(decryptAccountVault(`${sealed}x`)).toBeNull();
   });
 
-  it("builds a static welcome email with user details and no verification step", () => {
-    const mail = buildStaticWelcomeEmail({
-      name: testName,
-      email: testEmail,
-      phone: testPhone,
-    });
-    expect(mail.subject).toMatch(/Welcome to RoundTable/i);
-    expect(mail.text).toContain(testName);
-    expect(mail.text).toContain(testEmail);
-    expect(mail.text).toContain(testPhone);
-    expect(mail.text).toMatch(/No email verification is required/i);
-    expect(mail.html).toContain(testName);
-  });
-
-  it("runs full auth API flow: signup -> static welcome mail logged -> login with username & Gmail -> cold-start vault login -> me -> logout", async () => {
+  it("runs full auth API flow: signup (no mail sent) -> login with username & Gmail -> cold-start vault login -> me -> logout", async () => {
     // 1. Sign up
     const signupRes = await invokeApp({
       method: "POST",
@@ -182,12 +167,11 @@ describe("RoundTable Auth, Account Vault & Static Welcome Mailer", () => {
     const signupJson = signupRes.json<{
       ok: boolean;
       user: { name: string; email: string; phone: string };
-      emailNotification: { to: string; subject: string; previewText: string };
+      emailNotification?: unknown;
     }>();
     expect(signupJson.ok).toBe(true);
     expect(signupJson.user.email).toBe(testEmail);
-    expect(signupJson.emailNotification.to).toBe(testEmail);
-    expect(signupJson.emailNotification.subject).toMatch(/Welcome to RoundTable/i);
+    expect(signupJson.emailNotification).toBeUndefined();
 
     const setCookieHeader = signupRes.headers["set-cookie"];
     const cookieList = Array.isArray(setCookieHeader)
@@ -199,13 +183,6 @@ describe("RoundTable Auth, Account Vault & Static Welcome Mailer", () => {
       .map((c) => c.split(";")[0] ?? "")
       .find((c) => c.startsWith("rt_acct_vault="));
     expect(vaultCookiePair).toBeTruthy();
-
-    // Verify static welcome email was recorded in email_logs
-    const emailLog = db
-      .prepare("SELECT * FROM email_logs WHERE LOWER(recipient_email) = LOWER(?)")
-      .get(testEmail) as { recipient_email: string; subject: string } | undefined;
-    expect(emailLog).toBeDefined();
-    expect(emailLog?.subject).toMatch(/Welcome to RoundTable/i);
 
     // 2. Duplicate signup rejected
     const dupRes = await invokeApp({
@@ -252,7 +229,7 @@ describe("RoundTable Auth, Account Vault & Static Welcome Mailer", () => {
     });
     expect(loginByEmailRes.status).toBe(200);
 
-    // 6. Simulate Vercel serverless cold-start (user missing from fresh /tmp SQLite) -> rehydrates from HttpOnly vault cookie
+    // 6. Simulate Vercel serverless cold-start -> rehydrates from HttpOnly vault cookie
     db.prepare("DELETE FROM users WHERE LOWER(email) = LOWER(?)").run(testEmail);
     const coldLoginRes = await invokeApp({
       method: "POST",

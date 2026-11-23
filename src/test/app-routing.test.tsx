@@ -26,6 +26,9 @@ vi.mock("@react-three/fiber", () => ({
 
 vi.mock("@/game/interview/room", () => ({
   InterviewRoom: () => <div data-testid="mock-interview-room" />,
+  InteractiveAgentShowcaseCanvas: ({ member }: { member: { name: string } }) => (
+    <div data-testid={`mock-agent-3d-${member.name}`} />
+  ),
 }));
 
 const MOCK_USER: AuthUser = {
@@ -54,17 +57,47 @@ function renderRoute(initialEntry: string, initialUser: AuthUser | null = MOCK_U
   );
 }
 
-describe("RoundTable Authentication Gate & Unified Routing", () => {
-  it("shows the Authentication page (Login & Sign Up with Name, Gmail, Phone, Password) before accessing the web app", () => {
+describe("RoundTable Landing Pages, Authentication Gate & Unified Routing", () => {
+  it("renders minimalistic Landing Home at / with separate section links and Explore RoundTable CTA to /login", () => {
     renderRoute("/", null);
 
-    // Login tab shown initially
+    expect(screen.getByRole("heading", { name: /Prepare with intention\./i })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /^Home$/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: /^About$/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: /^Agents$/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: /^Benefits$/i }).length).toBeGreaterThan(0);
+
+    const exploreLinks = screen.getAllByRole("link", { name: /Explore RoundTable/i });
+    expect(exploreLinks.length).toBeGreaterThan(0);
+    expect(exploreLinks[0]).toHaveAttribute("href", "/login");
+  });
+
+  it("renders separate About, Agents (with all 5 interactive 3D Roblox characters), and Benefits pages", () => {
+    const aboutView = renderRoute("/about", null);
+    expect(screen.getByText(/Why Traditional Prep Falls Short/i)).toBeInTheDocument();
+    aboutView.unmount();
+
+    const agentsView = renderRoute("/agents", null);
+    expect(screen.getByTestId("mock-agent-3d-Nikhil")).toBeInTheDocument();
+    expect(screen.getByTestId("mock-agent-3d-ananya")).toBeInTheDocument();
+    expect(screen.getByTestId("mock-agent-3d-Daniel")).toBeInTheDocument();
+    expect(screen.getByTestId("mock-agent-3d-sarah")).toBeInTheDocument();
+    expect(screen.getByTestId("mock-agent-3d-Marcus")).toBeInTheDocument();
+    agentsView.unmount();
+
+    const benefitsView = renderRoute("/benefits", null);
+    expect(screen.getByText(/Preparing alone vs\. preparing at RoundTable/i)).toBeInTheDocument();
+    benefitsView.unmount();
+  });
+
+  it("renders Login & Sign Up at /login with Name, Gmail, Phone Number, Password and card fade transition", () => {
+    renderRoute("/login", null);
+
     expect(screen.getByText(/Sign in to RoundTable/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Username$/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Password$/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Access RoundTable/i })).toBeInTheDocument();
 
-    // Switch to Sign Up tab and verify all required fields
     fireEvent.click(screen.getByRole("tab", { name: /Sign Up/i }));
     expect(screen.getByLabelText(/Full Name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Gmail/i)).toBeInTheDocument();
@@ -73,7 +106,7 @@ describe("RoundTable Authentication Gate & Unified Routing", () => {
     expect(screen.getByRole("button", { name: /Create Account/i })).toBeInTheDocument();
   });
 
-  it("renders Overview at / with RoundTable branding, signed-in user info, sign out, and all 5 panel agents", () => {
+  it("renders Overview at / when authenticated with signed-in user info, sign out, and all 5 panel agents", () => {
     renderRoute("/");
     expect(screen.getAllByText(/RoundTable/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText("Nikhil").length).toBeGreaterThan(0);
@@ -96,29 +129,20 @@ describe("RoundTable Authentication Gate & Unified Routing", () => {
     expect(screen.getByTestId("mock-three-canvas")).toBeInTheDocument();
     expect(screen.getByText(/Candidate Vision/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Click the conference table/i).length).toBeGreaterThan(0);
-    // Verified that the right-side conversation and interview panel blocks are removed
     expect(screen.queryByRole("heading", { name: "Interview Panel" })).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Conversation" })).not.toBeInTheDocument();
-    // Verified dynamic weather badge trigger is rendered
     expect(screen.getByLabelText(/Weather and time atmosphere settings/i)).toBeInTheDocument();
   });
 
   it("verifies sidebar has only 1 collapsible button and section links are properly rendered", () => {
     renderRoute("/");
-    // Exactly 1 desktop sidebar drawer toggle button
     const hideBtn = screen.getByRole("button", { name: /Hide sidebar drawer/i });
     expect(hideBtn).toBeInTheDocument();
     expect(screen.queryAllByRole("button", { name: /Hide sidebar drawer/i }).length).toBe(1);
 
-    // Verify workspace nav links are rendered
-    const overviewLink = screen.getByRole("link", { name: /Overview/i });
-    expect(overviewLink).toBeInTheDocument();
-
-    const registrationLink = screen.getByRole("link", { name: /Interview Registration/i });
-    expect(registrationLink).toBeInTheDocument();
-
-    const roomLink = screen.getByRole("link", { name: /Interview Room/i });
-    expect(roomLink).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Overview/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Interview Registration/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Interview Room/i })).toBeInTheDocument();
   });
 
   it("renders all 5 specialist development sections", () => {

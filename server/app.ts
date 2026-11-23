@@ -41,7 +41,6 @@ import {
   type UserDbRow,
 } from "./services/auth.js";
 import { kokoroService } from "./services/kokoro.js";
-import { isMailProviderConfigured, sendStaticWelcomeEmail } from "./services/mailer.js";
 import { openCvService } from "./services/opencv.js";
 import { extractResumeText } from "./services/resumeParser.js";
 import { whisperService } from "./services/whisper.js";
@@ -73,7 +72,6 @@ app.get("/api/health", (_req, res) => {
     database: "sqlite",
     vercel: config.isVercel,
     blobStorageConfigured: Boolean(config.blobReadWriteToken),
-    mailConfigured: isMailProviderConfigured(),
     kokoro: kokoroService.getStatus(),
     whisper: whisperService.getStatus(),
     opencv: openCvService.getStatus(),
@@ -82,7 +80,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// Authentication (Sign Up + Static Welcome Email + Username/Password Login)
+// Authentication (Sign Up + Username/Password Login)
 // ---------------------------------------------------------------------------
 app.post("/api/auth/signup", async (req, res) => {
   try {
@@ -131,38 +129,9 @@ app.post("/api/auth/signup", async (req, res) => {
       created_at: userRow.created_at,
     });
 
-    const emailResult = await sendStaticWelcomeEmail({
-      name: userRow.name,
-      email: userRow.email,
-      phone: userRow.phone,
-    });
-
-    db.prepare(
-      `
-      INSERT INTO email_logs (user_id, recipient_email, subject, body_text, delivery_mode, delivered, error_message)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `,
-    ).run(
-      userRow.id,
-      emailResult.to,
-      emailResult.subject,
-      emailResult.bodyText,
-      emailResult.mode,
-      emailResult.sent ? 1 : 0,
-      emailResult.error ?? null,
-    );
-
     res.status(201).json({
       ok: true,
       user: sanitizeUser(userRow),
-      emailNotification: {
-        sent: emailResult.sent,
-        mode: emailResult.mode,
-        to: emailResult.to,
-        subject: emailResult.subject,
-        message: emailResult.message,
-        previewText: emailResult.bodyText,
-      },
     });
   } catch (err) {
     res.status(500).json({

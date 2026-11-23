@@ -1,4 +1,4 @@
-import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
+import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   CanvasTexture,
@@ -1353,5 +1353,367 @@ export function InterviewRoom({
         </mesh>
       </group>
     </>
+  );
+}
+
+/**
+ * Interactive Standing 3D Roblox Character Figure for the Agents Landing Showcase.
+ * Supports smooth 360-degree click-and-drag inspection, gentle cursor eye-contact tracking,
+ * natural breathing & blinking, and a cheerful wave greeting animation on click.
+ */
+function InteractiveRobloxCharacter({
+  member,
+  dragRotationRef,
+  pointerRef,
+  waveUntilRef,
+  onWave,
+}: {
+  member: PanelMember;
+  dragRotationRef: React.MutableRefObject<{ yaw: number; pitch: number; isDragging: boolean }>;
+  pointerRef: React.MutableRefObject<{ x: number; y: number }>;
+  waveUntilRef: React.MutableRefObject<number>;
+  onWave: () => void;
+}) {
+  const rootRef = useRef<Group>(null);
+  const headRef = useRef<Group>(null);
+  const rightArmPivotRef = useRef<Group>(null);
+  const leftArmPivotRef = useRef<Group>(null);
+  const mouthRef = useRef<Mesh>(null);
+  const leftEyeRef = useRef<Mesh>(null);
+  const rightEyeRef = useRef<Mesh>(null);
+  const ringMatRef = useRef<{ emissiveIntensity: number }>(null);
+
+  const currentYaw = useRef(0.18);
+  const currentPitch = useRef(0.02);
+
+  const torsoWidth =
+    member.name === "Marcus"
+      ? 0.88
+      : member.name === "ananya" || member.name === "sarah"
+        ? 0.77
+        : 0.83;
+
+  const trouserColor =
+    member.name === "ananya" ? "#4a594c" : member.name === "sarah" ? "#4a3f3d" : "#2a3430";
+
+  useFrame(({ clock }, delta) => {
+    const dt = Math.min(0.1, delta);
+    const t = clock.elapsedTime;
+    const now = performance.now();
+    const waveRemaining = Math.max(0, (waveUntilRef.current - now) / 1000);
+    const isWaving = waveRemaining > 0;
+
+    // Gentle idle studio sway when user isn't dragging
+    if (!dragRotationRef.current.isDragging && !isWaving) {
+      dragRotationRef.current.yaw += dt * 0.22;
+    }
+
+    currentYaw.current = MathUtils.damp(currentYaw.current, dragRotationRef.current.yaw, 9, dt);
+    currentPitch.current = MathUtils.damp(
+      currentPitch.current,
+      dragRotationRef.current.pitch,
+      9,
+      dt,
+    );
+
+    if (rootRef.current) {
+      rootRef.current.rotation.y = currentYaw.current;
+      rootRef.current.rotation.x = currentPitch.current;
+      const breath = Math.sin(t * 1.6) * 0.018;
+      const bounce = isWaving ? Math.abs(Math.sin(t * 7.2)) * 0.055 : 0;
+      rootRef.current.position.y = -1.35 + breath + bounce;
+    }
+
+    if (headRef.current) {
+      const targetHeadY = MathUtils.clamp(pointerRef.current.x * 0.28, -0.32, 0.32);
+      const targetHeadX = isWaving
+        ? -0.06 + Math.sin(t * 6.4) * 0.06
+        : MathUtils.clamp(-pointerRef.current.y * 0.16, -0.18, 0.18);
+      headRef.current.rotation.y = MathUtils.damp(headRef.current.rotation.y, targetHeadY, 8, dt);
+      headRef.current.rotation.x = MathUtils.damp(headRef.current.rotation.x, targetHeadX, 8, dt);
+    }
+
+    if (rightArmPivotRef.current) {
+      const targetZ = isWaving ? 2.45 + Math.sin(t * 11.5) * 0.36 : -0.08;
+      const targetX = isWaving ? -0.25 : Math.sin(t * 1.4) * 0.05;
+      rightArmPivotRef.current.rotation.z = MathUtils.damp(
+        rightArmPivotRef.current.rotation.z,
+        targetZ,
+        12,
+        dt,
+      );
+      rightArmPivotRef.current.rotation.x = MathUtils.damp(
+        rightArmPivotRef.current.rotation.x,
+        targetX,
+        10,
+        dt,
+      );
+    }
+
+    if (leftArmPivotRef.current) {
+      const targetX = isWaving ? -0.14 : -Math.sin(t * 1.4) * 0.05;
+      leftArmPivotRef.current.rotation.x = MathUtils.damp(
+        leftArmPivotRef.current.rotation.x,
+        targetX,
+        8,
+        dt,
+      );
+    }
+
+    if (mouthRef.current) {
+      const targetMouthScaleY = isWaving ? 1.55 + Math.abs(Math.sin(t * 10)) * 0.75 : 1;
+      mouthRef.current.scale.y = MathUtils.damp(
+        mouthRef.current.scale.y,
+        targetMouthScaleY,
+        12,
+        dt,
+      );
+    }
+
+    const blinkCycle = (t + member.name.length * 0.65) % 4.4;
+    const eyeScaleY = blinkCycle > 4.26 ? 0.12 : 1;
+    if (leftEyeRef.current) leftEyeRef.current.scale.y = eyeScaleY;
+    if (rightEyeRef.current) rightEyeRef.current.scale.y = eyeScaleY;
+
+    if (ringMatRef.current) {
+      ringMatRef.current.emissiveIntensity = MathUtils.damp(
+        ringMatRef.current.emissiveIntensity,
+        isWaving ? 0.75 : 0.16,
+        8,
+        dt,
+      );
+    }
+  });
+
+  return (
+    <group>
+      {/* Frosted Studio Pedestal */}
+      <group position={[0, -1.42, 0]}>
+        <mesh receiveShadow>
+          <cylinderGeometry args={[1.08, 1.18, 0.14, 36]} />
+          <meshStandardMaterial color="#e8eee4" roughness={0.35} metalness={0.08} />
+        </mesh>
+        <mesh position={[0, 0.075, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[1.03, 0.024, 12, 48]} />
+          <meshStandardMaterial
+            ref={ringMatRef as never}
+            color="#c8a35f"
+            emissive="#d4af64"
+            emissiveIntensity={0.16}
+            metalness={0.78}
+            roughness={0.25}
+          />
+        </mesh>
+      </group>
+
+      {/* Standing Full-Body Roblox Character */}
+      <group
+        ref={rootRef}
+        position={[0, -1.35, 0]}
+        onClick={(e) => {
+          e.stopPropagation();
+          onWave();
+        }}
+      >
+        {/* Standing Legs & Dress Shoes */}
+        {[-0.21, 0.21].map((lx) => (
+          <group key={lx} position={[lx, 0, 0]}>
+            <mesh position={[0, 0.64, 0]} castShadow receiveShadow>
+              <boxGeometry args={[0.34, 1.02, 0.34]} />
+              <meshStandardMaterial color={trouserColor} roughness={0.82} />
+            </mesh>
+            <mesh position={[0, 0.08, 0.05]} castShadow>
+              <boxGeometry args={[0.35, 0.16, 0.44]} />
+              <meshStandardMaterial color="#27201c" roughness={0.48} />
+            </mesh>
+          </group>
+        ))}
+
+        {/* Torso & Blazer */}
+        <mesh position={[0, 1.62, 0]} castShadow receiveShadow>
+          <boxGeometry args={[torsoWidth, 0.94, 0.42]} />
+          <meshStandardMaterial color={member.jacketColor} roughness={0.76} />
+        </mesh>
+        {/* Crisp Shirt V */}
+        <mesh position={[0, 1.64, 0.22]}>
+          <boxGeometry args={[0.22, 0.78, 0.035]} />
+          <meshStandardMaterial color="#f2efe3" roughness={0.62} />
+        </mesh>
+        {/* Accent Tie / Lapel */}
+        <mesh position={[0, 1.44, 0.25]}>
+          <boxGeometry args={[0.09, 0.4, 0.05]} />
+          <meshStandardMaterial color={member.accentColor} roughness={0.5} />
+        </mesh>
+        {/* Neck */}
+        <mesh position={[0, 2.02, 0]} castShadow>
+          <cylinderGeometry args={[0.105, 0.115, 0.24, 12]} />
+          <meshStandardMaterial color={member.skinColor} roughness={0.84} />
+        </mesh>
+
+        {/* Head Assembly (reuses exact boardroom hair & glasses) */}
+        <group ref={headRef} position={[0, 0, 0]}>
+          <mesh position={[0, 2.35, 0.005]} castShadow>
+            <boxGeometry args={[0.56, 0.59, 0.48]} />
+            <meshStandardMaterial color={member.skinColor} roughness={0.86} />
+          </mesh>
+          <mesh ref={mouthRef} position={[0, 2.22, 0.254]}>
+            <boxGeometry args={[0.21, 0.045, 0.022]} />
+            <meshStandardMaterial color="#4e2e24" roughness={0.82} />
+          </mesh>
+          <mesh ref={leftEyeRef} position={[-0.115, 2.39, 0.256]}>
+            <boxGeometry args={[0.06, 0.08, 0.02]} />
+            <meshStandardMaterial color="#1f2922" roughness={0.68} />
+          </mesh>
+          <mesh ref={rightEyeRef} position={[0.115, 2.39, 0.256]}>
+            <boxGeometry args={[0.06, 0.08, 0.02]} />
+            <meshStandardMaterial color="#1f2922" roughness={0.68} />
+          </mesh>
+          <RobloxGlasses kind={member.hasGlasses} />
+          <RobloxHair member={member} />
+        </group>
+
+        {/* Left Shoulder-Pivoted Arm */}
+        <group ref={leftArmPivotRef} position={[-(torsoWidth / 2 + 0.13), 1.98, 0]}>
+          <mesh position={[0, -0.36, 0]} castShadow>
+            <boxGeometry args={[0.24, 0.72, 0.26]} />
+            <meshStandardMaterial color={member.jacketColor} roughness={0.78} />
+          </mesh>
+          <mesh position={[0, -0.78, 0.01]} castShadow>
+            <boxGeometry args={[0.21, 0.17, 0.22]} />
+            <meshStandardMaterial color={member.skinColor} roughness={0.84} />
+          </mesh>
+        </group>
+
+        {/* Right Shoulder-Pivoted Arm (raises cleanly to wave on click) */}
+        <group ref={rightArmPivotRef} position={[torsoWidth / 2 + 0.13, 1.98, 0]}>
+          <mesh position={[0, -0.36, 0]} castShadow>
+            <boxGeometry args={[0.24, 0.72, 0.26]} />
+            <meshStandardMaterial color={member.jacketColor} roughness={0.78} />
+          </mesh>
+          <mesh position={[0, -0.78, 0.01]} castShadow>
+            <boxGeometry args={[0.21, 0.17, 0.22]} />
+            <meshStandardMaterial color={member.skinColor} roughness={0.84} />
+          </mesh>
+        </group>
+      </group>
+    </group>
+  );
+}
+
+export interface InteractiveAgentShowcaseProps {
+  member: PanelMember;
+  waveSignal?: number;
+  resetSignal?: number;
+  onInteract?: () => void;
+}
+
+export function InteractiveAgentShowcaseCanvas({
+  member,
+  waveSignal = 0,
+  resetSignal = 0,
+  onInteract,
+}: InteractiveAgentShowcaseProps) {
+  const dragRotationRef = useRef({ yaw: 0.22, pitch: 0.03, isDragging: false });
+  const pointerRef = useRef({ x: 0, y: 0 });
+  const waveUntilRef = useRef(0);
+  const dragStartRef = useRef<{ x: number; y: number; yaw: number; pitch: number; moved: number }>({
+    x: 0,
+    y: 0,
+    yaw: 0.22,
+    pitch: 0.03,
+    moved: 0,
+  });
+
+  useEffect(() => {
+    if (waveSignal > 0) {
+      waveUntilRef.current = performance.now() + 2400;
+      dragRotationRef.current.yaw = 0;
+      dragRotationRef.current.pitch = 0.02;
+    }
+  }, [waveSignal]);
+
+  useEffect(() => {
+    if (resetSignal > 0) {
+      dragRotationRef.current.yaw = 0.18;
+      dragRotationRef.current.pitch = 0.03;
+    }
+  }, [resetSignal]);
+
+  const triggerWave = () => {
+    if (dragStartRef.current.moved > 6) return;
+    waveUntilRef.current = performance.now() + 2400;
+    dragRotationRef.current.yaw = 0;
+    dragRotationRef.current.pitch = 0.02;
+    onInteract?.();
+  };
+
+  return (
+    <div
+      className="relative w-full h-[330px] sm:h-[360px] rt-agent-3d-stage overflow-hidden select-none cursor-grab active:cursor-grabbing"
+      onPointerDown={(e) => {
+        dragRotationRef.current.isDragging = true;
+        dragStartRef.current = {
+          x: e.clientX,
+          y: e.clientY,
+          yaw: dragRotationRef.current.yaw,
+          pitch: dragRotationRef.current.pitch,
+          moved: 0,
+        };
+        try {
+          e.currentTarget.setPointerCapture(e.pointerId);
+        } catch {
+          // Ignore unsupported capture
+        }
+      }}
+      onPointerMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        pointerRef.current.x = ((e.clientX - rect.left) / Math.max(1, rect.width)) * 2 - 1;
+        pointerRef.current.y = -(((e.clientY - rect.top) / Math.max(1, rect.height)) * 2 - 1);
+
+        if (!dragRotationRef.current.isDragging) return;
+        const dx = e.clientX - dragStartRef.current.x;
+        const dy = e.clientY - dragStartRef.current.y;
+        dragStartRef.current.moved = Math.max(dragStartRef.current.moved, Math.hypot(dx, dy));
+        dragRotationRef.current.yaw = dragStartRef.current.yaw + dx * 0.011;
+        dragRotationRef.current.pitch = MathUtils.clamp(
+          dragStartRef.current.pitch + dy * 0.004,
+          -0.28,
+          0.32,
+        );
+      }}
+      onPointerUp={(e) => {
+        dragRotationRef.current.isDragging = false;
+        try {
+          e.currentTarget.releasePointerCapture(e.pointerId);
+        } catch {
+          // Ignore unsupported capture
+        }
+      }}
+      onPointerLeave={() => {
+        dragRotationRef.current.isDragging = false;
+        pointerRef.current.x = 0;
+        pointerRef.current.y = 0;
+      }}
+    >
+      <Canvas
+        shadows
+        dpr={[1, 1.5]}
+        camera={{ position: [0, 0.35, 4.45], fov: 38 }}
+        gl={{ alpha: true, antialias: true }}
+      >
+        <ambientLight intensity={0.95} color="#fffef8" />
+        <hemisphereLight args={["#f7faf4", "#b4c5b0", 0.8]} />
+        <directionalLight position={[3.5, 5.2, 4.5]} intensity={1.35} color="#fffaf0" castShadow />
+        <directionalLight position={[-3.2, 2.8, -2.5]} intensity={0.55} color="#d9ead6" />
+        <pointLight position={[0, 2.2, 2.2]} intensity={0.85} color="#fff5e0" />
+        <InteractiveRobloxCharacter
+          member={member}
+          dragRotationRef={dragRotationRef}
+          pointerRef={pointerRef}
+          waveUntilRef={waveUntilRef}
+          onWave={triggerWave}
+        />
+      </Canvas>
+    </div>
   );
 }

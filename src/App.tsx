@@ -9,6 +9,10 @@ import { AuthPage } from "./pages/AuthPage";
 import { BehavioralPage } from "./pages/BehavioralPage";
 import { CareerPage } from "./pages/CareerPage";
 import { InterviewRoomPage } from "./pages/InterviewRoomPage";
+import { LandingAboutPage } from "./pages/landing/LandingAboutPage";
+import { LandingAgentsPage } from "./pages/landing/LandingAgentsPage";
+import { LandingBenefitsPage } from "./pages/landing/LandingBenefitsPage";
+import { LandingHomePage } from "./pages/landing/LandingHomePage";
 import { OverviewPage } from "./pages/OverviewPage";
 import { ReadinessPage } from "./pages/ReadinessPage";
 import { RegistrationPage } from "./pages/RegistrationPage";
@@ -30,7 +34,7 @@ export function AppRoutes() {
   if (loading) {
     return (
       <div className="min-h-dvh flex items-center justify-center p-6">
-        <div className="rt-card px-8 py-6 flex items-center gap-3.5">
+        <div className="rt-card px-8 py-6 flex items-center gap-3.5 rt-auth-card-fade">
           <div className="rt-brand-badge">
             <img
               src="/logo.png"
@@ -50,7 +54,16 @@ export function AppRoutes() {
   }
 
   if (!user) {
-    return <AuthPage />;
+    return (
+      <Routes>
+        <Route path="/" element={<LandingHomePage />} />
+        <Route path="/about" element={<LandingAboutPage />} />
+        <Route path="/agents" element={<LandingAgentsPage />} />
+        <Route path="/benefits" element={<LandingBenefitsPage />} />
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    );
   }
 
   return (

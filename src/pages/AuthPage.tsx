@@ -1,4 +1,5 @@
 import {
+  ArrowLeft,
   ArrowRight,
   CheckCircle2,
   Eye,
@@ -11,24 +12,26 @@ import {
   User,
   UserPlus,
 } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/AuthContext";
 import { useToast } from "@/components/ToastContext";
-import { api, type SignupEmailNotification } from "@/lib/api";
+import { api } from "@/lib/api";
 
 type AuthMode = "login" | "signup";
 
 const PANEL_PREVIEW = [
-  { name: "Nikhil", role: "Strategy & JD Decoder" },
-  { name: "ananya", role: "Resume Intelligence" },
-  { name: "Daniel", role: "Technical Architecture" },
-  { name: "sarah", role: "Behavioral & Presence" },
-  { name: "Marcus", role: "Hiring Bar Raiser" },
+  { name: "Nikhil", role: "Strategy & Role Alignment" },
+  { name: "ananya", role: "Resume Storytelling" },
+  { name: "Daniel", role: "Problem Solving & Depth" },
+  { name: "sarah", role: "Leadership & Presence" },
+  { name: "Marcus", role: "Final Hiring Readiness" },
 ];
 
 export function AuthPage() {
   const { loginWithCredentials } = useAuth();
   const { notify } = useToast();
+  const navigate = useNavigate();
 
   const [mode, setMode] = useState<AuthMode>("login");
 
@@ -46,13 +49,16 @@ export function AuthPage() {
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [signupPending, setSignupPending] = useState(false);
 
-  // Inline feedback & welcome email confirmation banner
+  // Inline feedback & confirmation banner
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [signupConfirmation, setSignupConfirmation] = useState<{
     name: string;
     email: string;
-    notification: SignupEmailNotification;
   } | null>(null);
+
+  useEffect(() => {
+    document.title = `${mode === "login" ? "Sign In" : "Create Account"} | RoundTable`;
+  }, [mode]);
 
   function switchMode(next: AuthMode) {
     setMode(next);
@@ -72,6 +78,7 @@ export function AuthPage() {
     try {
       const signedIn = await loginWithCredentials(trimmedUser, loginPassword);
       notify(`Welcome to RoundTable, ${signedIn.name}!`);
+      navigate("/", { replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Unable to sign in. Please try again.";
       setErrorMessage(msg);
@@ -117,7 +124,6 @@ export function AuthPage() {
       setSignupConfirmation({
         name: res.user.name,
         email: res.user.email,
-        notification: res.emailNotification,
       });
       setSignupName("");
       setSignupEmail("");
@@ -126,7 +132,7 @@ export function AuthPage() {
       setLoginUsername("");
       setLoginPassword("");
       setMode("login");
-      notify(res.emailNotification.message);
+      notify(`Account created for ${res.user.name}. Please sign in to access RoundTable.`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Could not create account.";
       setErrorMessage(msg);
@@ -136,10 +142,32 @@ export function AuthPage() {
   }
 
   return (
-    <div className="min-h-dvh flex items-center justify-center p-4 sm:p-6 lg:p-10">
-      <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-        {/* Left Glass Brand & 5-Agent Showcase */}
-        <section className="rt-glass-hero lg:col-span-6 p-7 sm:p-9 flex flex-col justify-between gap-6">
+    <div className="min-h-dvh flex flex-col justify-center p-4 sm:p-6 lg:p-10">
+      {/* Subtle Top Return Bar */}
+      <div className="w-full max-w-5xl mx-auto mb-5 flex items-center justify-between gap-3 rt-auth-card-fade">
+        <Link
+          to="/"
+          className="rt-pill no-underline hover:bg-white/85 transition-colors inline-flex items-center gap-1.5"
+        >
+          <ArrowLeft size={13} aria-hidden="true" />
+          <span>Back to Home</span>
+        </Link>
+        <div className="hidden sm:flex items-center gap-2">
+          <Link to="/about" className="rt-pill no-underline hover:bg-white/85 transition-colors">
+            About
+          </Link>
+          <Link to="/agents" className="rt-pill no-underline hover:bg-white/85 transition-colors">
+            Agents
+          </Link>
+          <Link to="/benefits" className="rt-pill no-underline hover:bg-white/85 transition-colors">
+            Benefits
+          </Link>
+        </div>
+      </div>
+
+      <div className="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        {/* Left Glass Brand & 5-Agent Showcase with Fade Entrance */}
+        <section className="rt-glass-hero rt-auth-card-fade lg:col-span-6 p-7 sm:p-9 flex flex-col justify-between gap-6">
           <div>
             <div className="flex items-center gap-3.5 mb-7">
               <div className="rt-brand-badge">
@@ -175,9 +203,9 @@ export function AuthPage() {
             </h1>
 
             <p className="text-sm text-[#435443] leading-relaxed">
-              Enter your private career studio to decode job descriptions, sharpen your resume,
-              practice live voice-to-voice interviews in a 3D boardroom with real-time facial
-              telemetry, and track hiring readiness across every attempt.
+              Enter your private career studio to decode job descriptions, strengthen your resume,
+              practice live voice-to-voice interviews in a virtual boardroom with calm camera
+              guidance, and track hiring readiness across every attempt.
             </p>
           </div>
 
@@ -199,15 +227,13 @@ export function AuthPage() {
 
             <div className="flex items-center gap-2 pt-2 text-[11px] text-[#4c5f4c]">
               <ShieldCheck size={14} className="text-[#365a38] shrink-0" aria-hidden="true" />
-              <span>
-                Instant account creation — static welcome mail sent directly to your Gmail.
-              </span>
+              <span>Private studio workspace — create your account and sign in right away.</span>
             </div>
           </div>
         </section>
 
-        {/* Right Glass Authentication Card */}
-        <section className="rt-card lg:col-span-6 p-7 sm:p-9 flex flex-col justify-center">
+        {/* Right Glass Authentication Card with Smooth Staggered Fade Transition */}
+        <section className="rt-card rt-auth-card-fade-delay lg:col-span-6 p-7 sm:p-9 flex flex-col justify-center">
           <div className="mb-6">
             <div className="rt-eyebrow mb-1">
               {mode === "login" ? "Member Access" : "Create Your Studio Account"}
@@ -218,7 +244,7 @@ export function AuthPage() {
             <p className="text-xs text-[#556754] mt-1.5 mb-0">
               {mode === "login"
                 ? "Enter your username (or Gmail) and password to access your workspace."
-                : "Fill in your details below. We will send a static welcome email to your Gmail right away."}
+                : "Fill in your name, Gmail, phone number, and password to create your account."}
             </p>
           </div>
 
@@ -256,11 +282,11 @@ export function AuthPage() {
             </button>
           </div>
 
-          {/* Welcome Mail Confirmation Banner after Sign Up */}
+          {/* Confirmation Banner after Sign Up */}
           {signupConfirmation && mode === "login" && (
             <div
               role="status"
-              className="mb-5 rounded-2xl border border-[#8db38a]/70 bg-[#eef7ec]/85 backdrop-blur-md p-4 text-xs text-[#203c22] space-y-1.5"
+              className="mb-5 rounded-2xl border border-[#8db38a]/70 bg-[#eef7ec]/85 backdrop-blur-md p-4 text-xs text-[#203c22] rt-auth-panel-fade"
             >
               <div className="flex items-start gap-2.5">
                 <CheckCircle2
@@ -272,27 +298,12 @@ export function AuthPage() {
                   <div className="font-semibold text-[#1a341d]">
                     Account created for {signupConfirmation.name}!
                   </div>
-                  <p className="m-0 text-[#355237] leading-relaxed">
-                    {signupConfirmation.notification.sent
-                      ? `A static welcome email confirming your RoundTable account has been sent to ${signupConfirmation.email}.`
-                      : `A static welcome email confirming your RoundTable account has been created for ${signupConfirmation.email}.`}
-                  </p>
-                  <p className="m-0 font-medium text-[#1f3b22]">
-                    No email verification needed — enter your username (
+                  <p className="m-0 font-medium text-[#1f3b22] leading-relaxed">
+                    Enter your username (
                     <span className="font-semibold">{signupConfirmation.name}</span> or{" "}
                     <span className="font-semibold">{signupConfirmation.email}</span>) and password
                     below to enter RoundTable.
                   </p>
-                  {signupConfirmation.notification.previewText && (
-                    <details className="pt-1">
-                      <summary className="cursor-pointer font-semibold text-[#2d5230] hover:underline">
-                        View static welcome email message
-                      </summary>
-                      <pre className="mt-2 whitespace-pre-wrap rounded-xl bg-white/75 border border-white p-3 text-[11px] font-sans text-[#2c3f2d] leading-relaxed">
-                        {`Subject: ${signupConfirmation.notification.subject}\nTo: ${signupConfirmation.email}\n\n${signupConfirmation.notification.previewText}`}
-                      </pre>
-                    </details>
-                  )}
                 </div>
               </div>
             </div>
@@ -302,14 +313,19 @@ export function AuthPage() {
           {errorMessage && (
             <div
               role="alert"
-              className="mb-5 rounded-2xl border border-[#d9948c]/80 bg-[#fcebe9]/90 px-4 py-3 text-xs font-medium text-[#8b3027]"
+              className="mb-5 rounded-2xl border border-[#d9948c]/80 bg-[#fcebe9]/90 px-4 py-3 text-xs font-medium text-[#8b3027] rt-auth-panel-fade"
             >
               {errorMessage}
             </div>
           )}
 
           {mode === "login" ? (
-            <form onSubmit={handleLoginSubmit} noValidate>
+            <form
+              key="login-form"
+              onSubmit={handleLoginSubmit}
+              noValidate
+              className="rt-auth-panel-fade"
+            >
               <div className="rt-field">
                 <label htmlFor="login-username">Username</label>
                 <div className="relative">
@@ -386,7 +402,12 @@ export function AuthPage() {
               </p>
             </form>
           ) : (
-            <form onSubmit={handleSignupSubmit} noValidate>
+            <form
+              key="signup-form"
+              onSubmit={handleSignupSubmit}
+              noValidate
+              className="rt-auth-panel-fade"
+            >
               <div className="rt-field">
                 <label htmlFor="signup-name">Full Name</label>
                 <div className="relative">
@@ -489,7 +510,7 @@ export function AuthPage() {
 
               <button type="submit" disabled={signupPending} className="rt-btn w-full mt-2">
                 <UserPlus size={15} aria-hidden="true" />
-                {signupPending ? "Creating account & sending mail..." : "Create Account"}
+                {signupPending ? "Creating account..." : "Create Account"}
               </button>
 
               <p className="text-center text-xs text-[#556855] mt-5 mb-0">

@@ -119,7 +119,7 @@ npm run build
 RoundTable includes full Vercel production scaffolding optimized to stay well under Vercel's **200 MB** serverless function size budget (~69 MB unzipped):
 - `vercel.json` — SPA fallback rewrites, `/api/(.*)` & `/recordings/(.*)` routing to `api/index.ts`, Node 24.x (`maxDuration: 60`, `memory: 1024`), explicit 5-voice Kokoro `includeFiles`, and automated `excludeFiles` trimming (`onnxruntime-node` non-Linux-x64 binaries, `onnxruntime-web`, `@napi-rs`, transformers WASM/source-maps/cache, and unused `pdfjs-dist` browser assets).
 - `.vercelignore` — excludes local SQLite DB, local recordings, uploads, docs, and duplicate root assets.
-- `api/index.ts` & `server/app.ts` — Serverless Express entry point with `/tmp` writable cache/SQLite fallback, stateless HMAC-SHA256 auth tokens + encrypted HttpOnly account vault for cold-start resilience, zero-dependency static welcome mailer, and `@vercel/blob` persistent clip uploads when `BLOB_READ_WRITE_TOKEN` is configured.
+- `api/index.ts` & `server/app.ts` — Serverless Express entry point with `/tmp` writable cache/SQLite fallback, stateless HMAC-SHA256 auth tokens + encrypted HttpOnly account vault for cold-start resilience, and `@vercel/blob` persistent clip uploads when `BLOB_READ_WRITE_TOKEN` is configured.
 - `@vercel/analytics` and `@vercel/speed-insights` telemetry active in `src/App.tsx`.
 
 Configure these environment variables in your Vercel Project Settings:
@@ -128,5 +128,4 @@ Configure these environment variables in your Vercel Project Settings:
 - `OPENROUTER_FALLBACK_MODEL` *(optional, defaults to `cohere/north-mini-code:free`)*
 - `KOKORO_DTYPE` *(optional, defaults to `q8`)*
 - `AUTH_SECRET` *(recommended, random secret string for signing auth sessions)*
-- `SMTP_USER` & `SMTP_PASS` *(optional, Gmail address + 16-char Gmail App Password for live static welcome email delivery on sign-up; or use `RESEND_API_KEY` + `MAIL_FROM`)*
 - `BLOB_READ_WRITE_TOKEN` *(optional, recommended for permanent multi-attempt video clip storage across serverless instances)*

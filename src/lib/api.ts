@@ -9,15 +9,6 @@ export interface AuthUser {
   created_at: string;
 }
 
-export interface SignupEmailNotification {
-  sent: boolean;
-  mode: "resend" | "smtp" | "preview";
-  to: string;
-  subject: string;
-  message: string;
-  previewText?: string;
-}
-
 const AUTH_TOKEN_KEY = "rt_auth_token";
 
 export function getStoredAuthToken(): string | null {
@@ -208,7 +199,6 @@ export const api = {
     apiJson<{
       ok: boolean;
       user: AuthUser;
-      emailNotification: SignupEmailNotification;
     }>("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

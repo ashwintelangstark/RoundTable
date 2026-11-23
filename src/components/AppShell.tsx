@@ -78,6 +78,7 @@ function SidebarNavContent({
   onNavigate?: () => void;
 }) {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [signingOut, setSigningOut] = useState(false);
 
   async function handleLogout() {
@@ -85,6 +86,7 @@ function SidebarNavContent({
     try {
       await logout();
       onNavigate?.();
+      navigate("/login", { replace: true });
     } finally {
       setSigningOut(false);
     }

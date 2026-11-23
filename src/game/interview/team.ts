@@ -10,6 +10,20 @@ export const INTERVIEW_PANEL = [
     sectionLabel: "Career Intelligence",
     tag: "Strategy",
     focus: "Decodes role requirements, company strategy, and unspoken interview expectations.",
+    personaTagline: "Opens the room and reveals what your target company truly values.",
+    candidateBrief:
+      "Nikhil sits at the head of the table to welcome you and frame your interview around the real job you are pursuing. Before you even step into a final round, he helps you read between the lines of a job posting — turning vague responsibilities into clear priorities so your answers feel tailored to the exact company and team.",
+    whatTheyListenFor: [
+      "Whether your career story connects naturally to the company's mission and stage",
+      "How clearly you prioritize business outcomes over generic task descriptions",
+      "Your awareness of the role's unspoken expectations and day-one goals",
+    ],
+    sampleQuestions: [
+      "What drew you to this specific team right now, and where do you see yourself creating the biggest impact in your first 90 days?",
+      "If priorities shifted mid-quarter on this role, how would you decide what matters most?",
+    ],
+    greetingQuote:
+      "Welcome to the table. Let's make sure every answer you give speaks directly to what this hiring team is looking for.",
     voiceId: "am_puck",
     voiceLabel: "Male Voice",
     skinColor: "#c88f68",
@@ -28,6 +42,20 @@ export const INTERVIEW_PANEL = [
     sectionLabel: "Resume Intelligence",
     tag: "Resume",
     focus: "Audits resume impact, uncovers skill gaps, and probes project ownership.",
+    personaTagline: "Turns every line on your resume into proof you can defend effortlessly.",
+    candidateBrief:
+      "ananya reads your resume the way an experienced recruiter and hiring manager do — spotting your strongest achievements alongside the exact points an interviewer will challenge. During your round, she asks thoughtful follow-ups about the work you led, helping you articulate measurable impact instead of underselling your contributions.",
+    whatTheyListenFor: [
+      "Concrete outcomes, numbers, and before-and-after results behind your resume bullets",
+      "Clear ownership — what you personally decided, built, or turned around",
+      "How smoothly you bridge any career transitions or missing keywords on paper",
+    ],
+    sampleQuestions: [
+      "You highlighted a major improvement on your resume — walk me through the exact part you personally owned from start to finish.",
+      "Which experience on your CV best prepares you for the toughest part of this new role?",
+    ],
+    greetingQuote:
+      "Your resume got you into the room — together, we'll make sure your spoken story makes your achievements unforgettable.",
     voiceId: "af_heart",
     voiceLabel: "Female Voice",
     skinColor: "#e0b28d",
@@ -46,6 +74,20 @@ export const INTERVIEW_PANEL = [
     sectionLabel: "Technical Interview Lab",
     tag: "Technical",
     focus: "Evaluates algorithms, ML/AI depth, architecture trade-offs, and scalability.",
+    personaTagline: "Sharpens how you think out loud through complex real-world problems.",
+    candidateBrief:
+      "Daniel challenges your problem-solving depth with calm, structured follow-ups that mirror real technical and case interviews. Rather than expecting memorized textbook definitions, he tests how you reason through constraints, explain trade-offs clearly under pressure, and adapt when requirements suddenly change.",
+    whatTheyListenFor: [
+      "Structured thinking — breaking a big ambiguous problem into clear, logical steps",
+      "Honest trade-off reasoning instead of jumping straight to a single answer",
+      "Calm clarity when asked 'what happens if traffic or complexity grows tenfold?'",
+    ],
+    sampleQuestions: [
+      "Walk me through a challenging system or project you designed — what alternatives did you reject and why?",
+      "If a critical part of your solution failed during peak demand, how would you catch it and recover gracefully?",
+    ],
+    greetingQuote:
+      "Great answers aren't memorized — they show calm, structured reasoning. Think out loud with me and let's test your edge.",
     voiceId: "bm_daniel",
     voiceLabel: "Male Voice",
     skinColor: "#b77b55",
@@ -64,6 +106,20 @@ export const INTERVIEW_PANEL = [
     sectionLabel: "Behavioral Intelligence",
     tag: "People",
     focus: "Assesses STAR storytelling, leadership, teamwork, and composure under pressure.",
+    personaTagline: "Elevates your storytelling, warmth, eye contact, and leadership presence.",
+    candidateBrief:
+      "sarah explores how you collaborate, handle conflict, bounce back from setbacks, and communicate under pressure. Alongside listening closely to your stories, she observes your composure, warmth, and steady camera presence — helping you deliver crisp, memorable stories that feel authentic rather than rehearsed.",
+    whatTheyListenFor: [
+      "Crisp, well-paced stories with a clear situation, personal action, and meaningful result",
+      "Empathy, accountability, and maturity when discussing tough disagreements or mistakes",
+      "Warm, composed body language, steady eye contact, and natural vocal confidence",
+    ],
+    sampleQuestions: [
+      "Tell me about a time a teammate strongly disagreed with your direction — how did you navigate it and what was the outcome?",
+      "Share a moment when a plan fell apart at the last minute. How did you keep everyone calm and moving forward?",
+    ],
+    greetingQuote:
+      "Hiring teams remember how you make them feel. Let's refine your stories so your confidence and empathy shine naturally.",
     voiceId: "af_sarah",
     voiceLabel: "Female Voice",
     skinColor: "#d6a27b",
@@ -82,6 +138,20 @@ export const INTERVIEW_PANEL = [
     sectionLabel: "Hiring Readiness",
     tag: "Bar Raiser",
     focus: "Benchmarks hiring bar, tests high-stakes ownership, and authors the final report.",
+    personaTagline: "Calibrates your final-round readiness and delivers your hiring verdict.",
+    candidateBrief:
+      "Marcus plays the role of the senior executive bar raiser who steps in at the decisive close of the interview. He asks high-judgment ownership questions that separate strong candidates from standout hires, then brings every panelist's observations together into a clear readiness score and step-by-step preparation roadmap.",
+    whatTheyListenFor: [
+      "Long-term ownership, judgment under ambiguity, and willingness to raise team standards",
+      "Consistency across your role motivation, resume claims, problem-solving, and leadership",
+      "Whether you are truly ready to walk into the real final round and earn the offer",
+    ],
+    sampleQuestions: [
+      "Tell me about the highest-stakes decision you had to make without complete information — what would you do differently today?",
+      "Why should this hiring committee raise the bar by bringing you onto the team right now?",
+    ],
+    greetingQuote:
+      "My job is to make sure you walk out of practice knowing exactly where you stand — and exactly how to earn a Strong Hire.",
     voiceId: "bm_george",
     voiceLabel: "Male Voice",
     skinColor: "#8d583a",

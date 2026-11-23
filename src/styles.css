@@ -985,7 +985,216 @@ dialog.rt-drawer::backdrop {
   }
 }
 
+/* =========================================================================
+   Landing Page Glassmorphism, Cinematic Scroll Reveals & Auth Fade Motion
+   ========================================================================= */
+
+html {
+  scroll-behavior: smooth;
+}
+
+.rt-scroll-progress {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  block-size: 2.5px;
+  z-index: 60;
+  background: linear-gradient(90deg, rgba(120, 149, 117, 0.75), #2e4d31, #c8a35f);
+  transform-origin: left center;
+  transition: transform 0.08s linear;
+  pointer-events: none;
+}
+
+.rt-landing-header {
+  position: sticky;
+  inset-block-start: 14px;
+  z-index: 40;
+  margin-inline: auto;
+  max-inline-size: 1180px;
+  padding-inline: 16px;
+}
+
+.rt-landing-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 14px 10px 18px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.52) 0%,
+    rgba(255, 255, 255, 0.24) 100%
+  );
+  backdrop-filter: blur(30px) saturate(190%);
+  -webkit-backdrop-filter: blur(30px) saturate(190%);
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  box-shadow:
+    0 18px 44px -12px rgba(22, 45, 28, 0.14),
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.96);
+}
+
+.rt-landing-link {
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #364a37;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition:
+    background-color 0.22s ease,
+    border-color 0.22s ease,
+    color 0.22s ease,
+    transform 0.22s ease;
+}
+
+.rt-landing-link:hover {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(255, 255, 255, 0.8);
+  color: #1c2c1e;
+}
+
+.rt-landing-link[aria-current="page"] {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(255, 255, 255, 0.98);
+  color: #1c2c1e;
+  font-weight: 600;
+  box-shadow:
+    0 6px 18px -4px rgba(22, 45, 28, 0.12),
+    inset 0 1px 1.5px #ffffff;
+}
+
+/* Cinematic Scroll-Triggered Reveal Transitions */
+.rt-reveal {
+  opacity: 0;
+  will-change: opacity, transform, filter;
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.95s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: blur(7px);
+}
+
+.rt-reveal[data-variant="up"] {
+  transform: translate3d(0, 38px, 0) scale(0.985);
+}
+
+.rt-reveal[data-variant="scale"] {
+  transform: translate3d(0, 20px, 0) scale(0.94);
+}
+
+.rt-reveal[data-variant="left"] {
+  transform: translate3d(-34px, 0, 0);
+}
+
+.rt-reveal[data-variant="right"] {
+  transform: translate3d(34px, 0, 0);
+}
+
+.rt-reveal[data-variant="fade"] {
+  transform: translate3d(0, 12px, 0);
+}
+
+.rt-reveal.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  filter: blur(0);
+}
+
+/* Page Entrance & Subtle Floating Medallion Motion */
+@keyframes rtPageGlide {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+  }
+}
+
+@keyframes rtFloatSlow {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+@keyframes rtAuthFadeCard {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0) scale(0.975);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes rtAuthPanelSwap {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.rt-page-enter {
+  animation: rtPageGlide 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.rt-float-slow {
+  animation: rtFloatSlow 6.8s ease-in-out infinite;
+}
+
+.rt-auth-card-fade {
+  animation: rtAuthFadeCard 0.78s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.rt-auth-card-fade-delay {
+  animation: rtAuthFadeCard 0.86s cubic-bezier(0.16, 1, 0.3, 1) 0.14s both;
+}
+
+.rt-auth-panel-fade {
+  animation: rtAuthPanelSwap 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.rt-agent-3d-stage {
+  background: radial-gradient(
+    ellipse at 50% 35%,
+    rgba(255, 255, 255, 0.62) 0%,
+    rgba(227, 237, 224, 0.32) 60%,
+    rgba(195, 212, 193, 0.22) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 24px;
+  box-shadow:
+    inset 0 2px 12px rgba(255, 255, 255, 0.85),
+    0 18px 40px -14px rgba(22, 45, 28, 0.14);
+}
+
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .rt-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
   *,
   *::before,
   *::after {
