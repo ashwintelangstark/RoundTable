@@ -5,6 +5,7 @@ import { Duplex } from "node:stream";
 import type { Request, Response } from "express";
 import { afterAll, describe, expect, it } from "vitest";
 import { app } from "../app.js";
+import { sanitizeOpenRouterApiKey } from "../config.js";
 import { db } from "../db.js";
 import {
   createAuthToken,
@@ -14,6 +15,7 @@ import {
   verifyAuthToken,
   verifyPassword,
 } from "./auth.js";
+import { extractJsonFromLlm } from "./openrouter.js";
 
 interface MockResponseResult {
   status: number;
@@ -111,6 +113,40 @@ describe("RoundTable Auth & Account Vault", () => {
 
   afterAll(() => {
     db.prepare("DELETE FROM users WHERE LOWER(email) = LOWER(?)").run(testEmail);
+  });
+
+  it("sanitizes OpenRouter API keys pasted with quotes, Bearer prefix, or KEY= prefix", () => {
+    const rawKey = "sk-or-v1-abc123XYZ789";
+    expect(sanitizeOpenRouterApiKey(rawKey)).toBe(rawKey);
+    expect(sanitizeOpenRouterApiKey(`"${rawKey}"`)).toBe(rawKey);
+    expect(sanitizeOpenRouterApiKey(`'${rawKey}'\n`)).toBe(rawKey);
+    expect(sanitizeOpenRouterApiKey(`Bearer ${rawKey}`)).toBe(rawKey);
+    expect(sanitizeOpenRouterApiKey(`OPENROUTER_API_KEY="${rawKey}"`)).toBe(rawKey);
+    expect(sanitizeOpenRouterApiKey("   ")).toBe("");
+  });
+
+  it("extracts balanced JSON objects from noisy LLM outputs and rejects stray arrays", () => {
+    const noisy = `<think>Evaluating [prompt] carefully</think>
+Here is the JSON response:
+\`\`\`json
+{
+  "question": "Design a multi-region queue with idempotency.",
+  "hints": ["Consider partitioning", "Use deduplication keys",],
+  "rubric": ["Throughput", "Fault tolerance"]
+}
+\`\`\`
+Hope this helps!`;
+    const parsed = extractJsonFromLlm<{ question: string; hints: string[] }>(noisy);
+    expect(parsed.question).toBe("Design a multi-region queue with idempotency.");
+    expect(parsed.hints).toEqual(["Consider partitioning", "Use deduplication keys"]);
+
+    const withBracesAndBrackets =
+      '[responds to prompt] See {short} note below: {"summary": "Good work, note: add caching", "score": 88}';
+    const obj = extractJsonFromLlm<{ summary: string; score: number }>(withBracesAndBrackets);
+    expect(obj.summary).toBe("Good work, note: add caching");
+    expect(obj.score).toBe(88);
+
+    expect(() => extractJsonFromLlm('["hint1", "hint2"]')).toThrow();
   });
 
   it("hashes and verifies passwords with scrypt + timingSafeEqual", () => {

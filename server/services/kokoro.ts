@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import type { KokoroTTS } from "kokoro-js";
 import { config } from "../config.js";
 
@@ -134,6 +135,7 @@ class KokoroService {
       this.lastError = null;
       this.ttsPromise = (async () => {
         if (config.hfCacheDir) {
+          fs.mkdirSync(config.hfCacheDir, { recursive: true });
           const { env } = await import("@huggingface/transformers");
           env.cacheDir = config.hfCacheDir;
         }

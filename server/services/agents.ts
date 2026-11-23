@@ -27,6 +27,23 @@ export interface InterviewRecord {
 export const ROUND_TYPES = ["Technical Round", "HR Round"] as const;
 export type InterviewRoundType = (typeof ROUND_TYPES)[number];
 
+function safeScore(raw: unknown, fallback: number, min = 20, max = 99): number {
+  const num =
+    typeof raw === "number" ? raw : typeof raw === "string" ? Number.parseFloat(raw) : Number.NaN;
+  if (!Number.isFinite(num)) return fallback;
+  return Math.max(min, Math.min(max, Math.round(num)));
+}
+
+function asNonEmptyString(raw: unknown, fallback = ""): string {
+  return typeof raw === "string" && raw.trim().length > 0 ? raw.trim() : fallback;
+}
+
+function asStringArray(raw: unknown, fallback: string[] = []): string[] {
+  if (!Array.isArray(raw)) return fallback;
+  const cleaned = raw.map((item) => (typeof item === "string" ? item.trim() : "")).filter(Boolean);
+  return cleaned.length > 0 ? cleaned : fallback;
+}
+
 export function normalizeRoundType(roundType?: string, approach?: string): InterviewRoundType {
   const combined = `${roundType ?? ""} ${approach ?? ""}`.toLowerCase();
   if (combined.includes("hr round") || combined === "hr" || combined.includes("behavioral heavy")) {
@@ -89,7 +106,7 @@ Role: ${input.role || "Software / AI Engineer"}
 Company Context: ${input.companyDesc || "Not provided"}
 Job Description: ${input.jobDescription || "Standard engineering expectations for this title."}`;
 
-  const { data: analysis, model } = await callOpenRouterJson<Record<string, unknown>>(
+  const { data: rawAnalysis, model } = await callOpenRouterJson<Record<string, unknown>>(
     [
       {
         role: "system",
@@ -97,8 +114,70 @@ Job Description: ${input.jobDescription || "Standard engineering expectations fo
       },
       { role: "user", content: prompt },
     ],
-    { temperature: 0.45, maxTokens: 1600 },
+    {
+      temperature: 0.45,
+      maxTokens: 1600,
+      validate: (d) =>
+        typeof d["summary"] === "string" &&
+        d["summary"].trim().length > 10 &&
+        Array.isArray(d["competencies"]) &&
+        d["competencies"].length > 0,
+    },
   );
+
+  const rawCompetencies = Array.isArray(rawAnalysis["competencies"])
+    ? rawAnalysis["competencies"]
+    : [];
+  const competencies = rawCompetencies
+    .map((c) => {
+      if (!c || typeof c !== "object") return null;
+      const rec = c as Record<string, unknown>;
+      const name = asNonEmptyString(rec["name"]);
+      if (!name) return null;
+      return {
+        name,
+        weight: safeScore(rec["weight"], 80, 40, 99),
+        expectation: asNonEmptyString(
+          rec["expectation"],
+          "Demonstrate structured, measurable depth in this area.",
+        ),
+      };
+    })
+    .filter((c): c is { name: string; weight: number; expectation: string } => c !== null);
+
+  const analysis = {
+    summary: asNonEmptyString(
+      rawAnalysis["summary"],
+      `Strategic role analysis for ${input.role || "this role"} at ${input.companyName || "the target company"}.`,
+    ),
+    company_signals: asStringArray(rawAnalysis["company_signals"], [
+      "Strong ownership and product execution bar",
+      "Cross-functional technical communication",
+    ]),
+    competencies:
+      competencies.length > 0
+        ? competencies
+        : [
+            {
+              name: "Role Execution & Architecture",
+              weight: 88,
+              expectation: "Deliver scalable, measurable solutions aligned with team priorities.",
+            },
+          ],
+    hidden_expectations: asStringArray(rawAnalysis["hidden_expectations"], [
+      "Clear trade-off reasoning under ambiguity",
+      "Evidence of measurable business impact",
+    ]),
+    interview_themes: asStringArray(rawAnalysis["interview_themes"], [
+      "Role & domain alignment",
+      "Technical execution & system trade-offs",
+      "Cross-team ownership & leadership",
+    ]),
+    prep_strategy: asStringArray(rawAnalysis["prep_strategy"], [
+      "Prepare 3 quantified project deep dives mapped directly to the job description.",
+      "Practice articulating architectural trade-offs concisely within 60 seconds.",
+    ]),
+  };
 
   return { analysis, model };
 }
@@ -149,12 +228,41 @@ ${input.resumeText.slice(0, 7000)}`;
       },
       { role: "user", content: prompt },
     ],
-    { temperature: 0.45, maxTokens: 1800 },
+    {
+      temperature: 0.45,
+      maxTokens: 1800,
+      validate: (d) =>
+        typeof d["executive_summary"] === "string" && d["executive_summary"].trim().length > 10,
+    },
   );
 
+  const overallScore = safeScore(parsed.overall_score, 78, 30, 99);
+  const rawSubs =
+    parsed["subscores"] && typeof parsed["subscores"] === "object"
+      ? (parsed["subscores"] as Record<string, unknown>)
+      : {};
+
+  const analysis = {
+    overall_score: overallScore,
+    subscores: {
+      structure_readability: safeScore(rawSubs["structure_readability"], overallScore, 25, 99),
+      achievement_clarity: safeScore(rawSubs["achievement_clarity"], overallScore, 25, 99),
+      role_alignment: safeScore(rawSubs["role_alignment"], overallScore, 25, 99),
+      quantified_impact: safeScore(rawSubs["quantified_impact"], overallScore - 3, 25, 99),
+    },
+    executive_summary: asNonEmptyString(
+      parsed["executive_summary"],
+      "Your resume shows relevant baseline experience; tighten quantified outcomes to stand out.",
+    ),
+    strengths: Array.isArray(parsed["strengths"]) ? parsed["strengths"] : [],
+    gaps: Array.isArray(parsed["gaps"]) ? parsed["gaps"] : [],
+    bullet_rewrites: Array.isArray(parsed["bullet_rewrites"]) ? parsed["bullet_rewrites"] : [],
+    missing_keywords: asStringArray(parsed["missing_keywords"], []),
+  };
+
   return {
-    overall_score: Math.max(30, Math.min(99, Number(parsed.overall_score ?? 78))),
-    analysis: parsed,
+    overall_score: overallScore,
+    analysis,
     model,
   };
 }
@@ -175,7 +283,7 @@ Return ONLY valid JSON:
   "rubric": ["3 key technical points a strong answer covers"]
 }`;
 
-  const { data, model } = await callOpenRouterJson<Record<string, unknown>>(
+  const { data: raw, model } = await callOpenRouterJson<Record<string, unknown>>(
     [
       {
         role: "system",
@@ -184,8 +292,25 @@ Return ONLY valid JSON:
       },
       { role: "user", content: prompt },
     ],
-    { temperature: 0.7, maxTokens: 900 },
+    {
+      temperature: 0.7,
+      maxTokens: 900,
+      validate: (d) => typeof d["question"] === "string" && d["question"].trim().length > 10,
+    },
   );
+
+  const data = {
+    question: asNonEmptyString(raw["question"]),
+    hints: asStringArray(raw["hints"], [
+      "Clarify throughput, latency budgets, and data consistency requirements first.",
+      "Identify the primary bottleneck and describe your failover strategy.",
+    ]),
+    rubric: asStringArray(raw["rubric"], [
+      "Clear architecture & data-flow breakdown",
+      "Explicit latency, scaling, and consistency trade-offs",
+      "Failure modes, monitoring, and recovery strategy",
+    ]),
+  };
 
   return { data, model };
 }
@@ -224,12 +349,44 @@ Candidate Answer: ${input.answer}`;
       },
       { role: "user", content: prompt },
     ],
-    { temperature: 0.45, maxTokens: 1300 },
+    {
+      temperature: 0.45,
+      maxTokens: 1300,
+      validate: (d) => typeof d["summary"] === "string" && d["summary"].trim().length > 10,
+    },
   );
 
+  const score = safeScore(parsed.score, 75, 20, 99);
+  const evaluation = {
+    score,
+    verdict: asNonEmptyString(
+      parsed["verdict"],
+      score >= 85
+        ? "Strong Pass"
+        : score >= 74
+          ? "Pass"
+          : score >= 62
+            ? "Borderline"
+            : "Needs Depth",
+    ),
+    summary: asNonEmptyString(parsed["summary"]),
+    strengths: asStringArray(parsed["strengths"], ["Structured core engineering intuition"]),
+    gaps: asStringArray(parsed["gaps"], [
+      "Explicitly quantify failure modes, bottlenecks, and alternative trade-offs.",
+    ]),
+    follow_up_question: asNonEmptyString(
+      parsed["follow_up_question"],
+      "How does this design behave under a 10x traffic spike or regional outage?",
+    ),
+    ideal_outline: asNonEmptyString(
+      parsed["ideal_outline"],
+      "1) Requirements & scale estimates 2) Core architecture & storage 3) Bottlenecks & caching 4) Failure handling & observability.",
+    ),
+  };
+
   return {
-    score: Math.max(20, Math.min(99, Number(parsed.score ?? 75))),
-    evaluation: parsed,
+    score,
+    evaluation,
     model,
   };
 }
@@ -248,7 +405,7 @@ Return ONLY valid JSON:
   "star_tip": "Quick reminder on structuring a high-impact STAR story"
 }`;
 
-  const { data, model } = await callOpenRouterJson<Record<string, unknown>>(
+  const { data: raw, model } = await callOpenRouterJson<Record<string, unknown>>(
     [
       {
         role: "system",
@@ -257,8 +414,24 @@ Return ONLY valid JSON:
       },
       { role: "user", content: prompt },
     ],
-    { temperature: 0.7, maxTokens: 700 },
+    {
+      temperature: 0.7,
+      maxTokens: 700,
+      validate: (d) => typeof d["question"] === "string" && d["question"].trim().length > 10,
+    },
   );
+
+  const data = {
+    question: asNonEmptyString(raw["question"]),
+    signal_sought: asNonEmptyString(
+      raw["signal_sought"],
+      `Ownership, judgment, and collaborative impact in ${input.category}.`,
+    ),
+    star_tip: asNonEmptyString(
+      raw["star_tip"],
+      "Keep Situation concise (~20%), spotlight your specific Action, and end with a quantified Result.",
+    ),
+  };
 
   return { data, model };
 }
@@ -298,12 +471,42 @@ Candidate Response: ${input.answer}`;
       },
       { role: "user", content: prompt },
     ],
-    { temperature: 0.5, maxTokens: 1300 },
+    {
+      temperature: 0.5,
+      maxTokens: 1300,
+      validate: (d) =>
+        typeof d["coaching_feedback"] === "string" && d["coaching_feedback"].trim().length > 10,
+    },
   );
 
+  const score = safeScore(parsed.score, 78, 20, 99);
+  const rawStar =
+    parsed["star_scores"] && typeof parsed["star_scores"] === "object"
+      ? (parsed["star_scores"] as Record<string, unknown>)
+      : {};
+
+  const evaluation = {
+    score,
+    star_scores: {
+      situation: safeScore(rawStar["situation"], score, 20, 99),
+      task: safeScore(rawStar["task"], score, 20, 99),
+      action: safeScore(rawStar["action"], score, 20, 99),
+      result: safeScore(rawStar["result"], score - 2, 20, 99),
+    },
+    strengths: asStringArray(parsed["strengths"], [
+      "Clear personal ownership of the scenario",
+      "Constructive communication under pressure",
+    ]),
+    coaching_feedback: asNonEmptyString(parsed["coaching_feedback"]),
+    polished_star_example: asNonEmptyString(
+      parsed["polished_star_example"],
+      "Open with the high-stakes context in one sentence, specify the exact decisions you personally drove, and close with the measurable outcome and lasting process change.",
+    ),
+  };
+
   return {
-    score: Math.max(20, Math.min(99, Number(parsed.score ?? 78))),
-    evaluation: parsed,
+    score,
+    evaluation,
     model,
   };
 }
@@ -555,8 +758,8 @@ export async function conductPanelTurn(input: {
 
   const { content, model } = await callOpenRouter(chatMessages, {
     temperature: 0.65,
-    maxTokens: 65,
-    timeoutMs: 10000,
+    maxTokens: 120,
+    timeoutMs: 12000,
   });
 
   return {
@@ -616,7 +819,7 @@ export async function conductPanelTurnStream(
 
   const { content, model } = await callOpenRouterStream(
     chatMessages,
-    { temperature: 0.65, maxTokens: 65, timeoutMs: 10000 },
+    { temperature: 0.65, maxTokens: 120, timeoutMs: 12000 },
     async (sentence) => {
       const cleaned = cleanAgentSpeechOutput(sentence);
       if (cleaned) await onSentence(cleaned, progress);
@@ -1098,7 +1301,12 @@ ${transcriptText.slice(0, 7500)}`;
         },
         { role: "user", content: prompt },
       ],
-      { temperature: 0.3, maxTokens: 2000, timeoutMs: 22000 },
+      {
+        temperature: 0.3,
+        maxTokens: 2000,
+        timeoutMs: 22000,
+        validate: (d) => typeof d.summary === "string" && d.summary.trim().length > 10,
+      },
     );
 
     const mergedAgentReports: GeneratedAgentDomainReport[] = fallback.agent_reports.map((fb) => {
@@ -1108,7 +1316,7 @@ ${transcriptText.slice(0, 7500)}`;
       if (!llmItem) return fb;
       return {
         ...fb,
-        score: Math.max(25, Math.min(99, Number(llmItem.score ?? fb.score))),
+        score: safeScore(llmItem.score, fb.score, 25, 99),
         verdict: llmItem.verdict || fb.verdict,
         summary: llmItem.summary || fb.summary,
         strengths:
@@ -1123,23 +1331,39 @@ ${transcriptText.slice(0, 7500)}`;
     });
 
     return {
-      overall_score: Math.max(
-        25,
-        Math.min(99, Number(parsed.overall_score ?? fallback.overall_score)),
-      ),
+      overall_score: safeScore(parsed.overall_score, fallback.overall_score, 25, 99),
       verdict: parsed.verdict || fallback.verdict,
       summary: parsed.summary || fallback.summary,
       breakdown: {
-        technical: Number(parsed.breakdown?.["technical"] ?? fallback.breakdown["technical"]),
-        problem_solving: Number(
-          parsed.breakdown?.["problem_solving"] ?? fallback.breakdown["problem_solving"],
+        technical: safeScore(
+          parsed.breakdown?.["technical"],
+          fallback.breakdown["technical"] ?? 72,
+          20,
+          99,
         ),
-        communication: Number(
-          parsed.breakdown?.["communication"] ?? fallback.breakdown["communication"],
+        problem_solving: safeScore(
+          parsed.breakdown?.["problem_solving"],
+          fallback.breakdown["problem_solving"] ?? 72,
+          20,
+          99,
         ),
-        behavioral: Number(parsed.breakdown?.["behavioral"] ?? fallback.breakdown["behavioral"]),
-        system_design: Number(
-          parsed.breakdown?.["system_design"] ?? fallback.breakdown["system_design"],
+        communication: safeScore(
+          parsed.breakdown?.["communication"],
+          fallback.breakdown["communication"] ?? 74,
+          20,
+          99,
+        ),
+        behavioral: safeScore(
+          parsed.breakdown?.["behavioral"],
+          fallback.breakdown["behavioral"] ?? 75,
+          20,
+          99,
+        ),
+        system_design: safeScore(
+          parsed.breakdown?.["system_design"],
+          fallback.breakdown["system_design"] ?? 70,
+          20,
+          99,
         ),
       },
       cv_coaching_note: parsed.cv_coaching_note || fallback.cv_coaching_note,

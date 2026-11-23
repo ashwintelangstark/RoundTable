@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import { config } from "../config.js";
 
 const WHISPER_MODEL_ID = "Xenova/whisper-tiny.en";
@@ -91,6 +92,7 @@ class WhisperService {
       this.asrPromise = (async () => {
         const { env, pipeline } = await import("@huggingface/transformers");
         if (config.hfCacheDir) {
+          fs.mkdirSync(config.hfCacheDir, { recursive: true });
           env.cacheDir = config.hfCacheDir;
         }
         return pipeline("automatic-speech-recognition", WHISPER_MODEL_ID, {

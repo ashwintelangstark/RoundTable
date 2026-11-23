@@ -255,10 +255,10 @@ export function BehavioralPage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                 {(
                   [
-                    ["Situation", evaluation.star_scores.situation],
-                    ["Task", evaluation.star_scores.task],
-                    ["Action", evaluation.star_scores.action],
-                    ["Result", evaluation.star_scores.result],
+                    ["Situation", evaluation.star_scores?.situation ?? evaluation.score],
+                    ["Task", evaluation.star_scores?.task ?? evaluation.score],
+                    ["Action", evaluation.star_scores?.action ?? evaluation.score],
+                    ["Result", evaluation.star_scores?.result ?? evaluation.score],
                   ] as const
                 ).map(([lbl, val]) => (
                   <div key={lbl} className="rounded-xl bg-[#f4f6ed] p-2.5 text-center">

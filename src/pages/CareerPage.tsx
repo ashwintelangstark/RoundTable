@@ -43,9 +43,15 @@ export function CareerPage() {
   });
 
   const result = analyzeMutation.data?.analysis;
-  const latestSaved = historyData?.history?.[0]
-    ? (JSON.parse(historyData.history[0].analysis_json) as NonNullable<typeof result>)
-    : null;
+  const latestSaved = (() => {
+    const raw = historyData?.history?.[0]?.analysis_json;
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as NonNullable<typeof result>;
+    } catch {
+      return null;
+    }
+  })();
   const activeAnalysis = result ?? latestSaved;
 
   async function speakSummary() {
@@ -53,7 +59,7 @@ export function CareerPage() {
     try {
       setSpeaking(true);
       await kokoroPlayer.speak(
-        `${activeAnalysis.summary} Focus your preparation on: ${activeAnalysis.prep_strategy.slice(0, 2).join(" ")}`,
+        `${activeAnalysis.summary ?? ""} Focus your preparation on: ${(activeAnalysis.prep_strategy ?? []).slice(0, 2).join(" ")}`,
         "Nikhil",
         { onEnd: () => setSpeaking(false) },
       );

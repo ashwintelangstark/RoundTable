@@ -5,7 +5,7 @@ import fs from "node:fs";
 import dns from "node:dns";
 import path from "node:path";
 import multer from "multer";
-import { config } from "./config.js";
+import { config, getOpenRouterApiKey } from "./config.js";
 import { db, listRecordingsForInterviewJob, markDemoSeedDismissed } from "./db.js";
 import {
   analyzeResumeWithAnanya,
@@ -67,6 +67,7 @@ app.use("/recordings", express.static(config.recordingsDir));
 app.use("/api/recordings", express.static(config.recordingsDir));
 
 app.get("/api/health", (_req, res) => {
+  const apiKey = getOpenRouterApiKey() || config.openrouterApiKey;
   res.json({
     ok: true,
     database: "sqlite",
@@ -75,7 +76,10 @@ app.get("/api/health", (_req, res) => {
     kokoro: kokoroService.getStatus(),
     whisper: whisperService.getStatus(),
     opencv: openCvService.getStatus(),
-    openrouterConfigured: Boolean(config.openrouterApiKey),
+    openrouterConfigured: Boolean(apiKey),
+    openrouterKeyValidFormat: /^sk-or-/.test(apiKey),
+    openrouterModel: config.openrouterModel,
+    openrouterFallbackModel: config.openrouterFallbackModel,
   });
 });
 
@@ -1053,7 +1057,7 @@ app.post("/api/interviews/:id/complete", async (req, res) => {
 // ---------------------------------------------------------------------------
 app.post(
   "/api/stt/transcribe",
-  express.raw({ type: "audio/*", limit: "15mb" }),
+  express.raw({ type: ["audio/*", "application/octet-stream"], limit: "15mb" }),
   async (req, res) => {
     try {
       let wavBuffer: Buffer;
@@ -1397,7 +1401,9 @@ app.get("/api/agents/practice/history", (req, res) => {
   const agent = req.query["agent"] as string | undefined;
   const rows = agent
     ? db
-        .prepare("SELECT * FROM practice_sessions WHERE agent = ? ORDER BY id DESC LIMIT 12")
+        .prepare(
+          "SELECT * FROM practice_sessions WHERE LOWER(agent) = LOWER(?) ORDER BY id DESC LIMIT 12",
+        )
         .all(agent)
     : db.prepare("SELECT * FROM practice_sessions ORDER BY id DESC LIMIT 20").all();
   res.json({ history: rows });

@@ -42,13 +42,19 @@ export function ResumePage() {
       notify(err instanceof Error ? err.message : "Resume analysis failed", "error"),
   });
 
-  const latestSaved = historyData?.history?.[0]
-    ? {
-        overall_score: historyData.history[0].overall_score,
-        filename: historyData.history[0].filename,
-        analysis: JSON.parse(historyData.history[0].analysis_json),
-      }
-    : null;
+  const latestSaved = (() => {
+    const first = historyData?.history?.[0];
+    if (!first) return null;
+    try {
+      return {
+        overall_score: first.overall_score,
+        filename: first.filename,
+        analysis: JSON.parse(first.analysis_json),
+      };
+    } catch {
+      return null;
+    }
+  })();
 
   const activeResult = analyzeMutation.data ?? latestSaved;
   const subscores = activeResult?.analysis?.subscores;
