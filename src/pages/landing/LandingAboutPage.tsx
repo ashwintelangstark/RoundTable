@@ -72,7 +72,7 @@ export function LandingAboutPage() {
       <div className="space-y-16">
         {/* ABOUT HERO */}
         <section className="rt-glass-hero p-8 sm:p-12">
-          <div className="max-w-3xl space-y-5">
+          <div className="max-w-4xl space-y-5">
             <span className="rt-tag">
               <Compass size={11} aria-hidden="true" />
               ABOUT ROUNDTABLE

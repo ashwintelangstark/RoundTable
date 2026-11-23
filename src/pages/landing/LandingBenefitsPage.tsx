@@ -89,7 +89,7 @@ export function LandingBenefitsPage() {
       <div className="space-y-16">
         {/* BENEFITS HERO */}
         <section className="rt-glass-hero p-8 sm:p-12">
-          <div className="max-w-3xl space-y-4">
+          <div className="max-w-4xl space-y-4">
             <span className="rt-tag">
               <Sparkles size={11} aria-hidden="true" />
               CANDIDATE BENEFITS

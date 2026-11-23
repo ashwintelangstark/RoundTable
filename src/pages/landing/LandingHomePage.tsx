@@ -78,7 +78,7 @@ export function LandingHomePage() {
                 </em>
               </h1>
 
-              <p className="text-[15px] sm:text-base text-[#415342] leading-relaxed max-w-xl m-0">
+              <p className="text-[15px] sm:text-base text-[#415342] leading-relaxed max-w-2xl m-0">
                 Walk into your next high-stakes interview feeling like you have already been in that
                 room. RoundTable seats you face-to-face with five thoughtful interviewers who guide
                 you through role strategy, resume probing, problem-solving, leadership storytelling,

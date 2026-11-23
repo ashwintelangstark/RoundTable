@@ -170,7 +170,7 @@ export function LandingAgentsPage() {
       <div className="space-y-12">
         {/* AGENTS HERO */}
         <section className="rt-glass-hero p-8 sm:p-12">
-          <div className="max-w-3xl space-y-4">
+          <div className="max-w-4xl space-y-4">
             <span className="rt-tag">
               <Users2 size={11} aria-hidden="true" />
               YOUR 5-AGENT INTERVIEW PANEL

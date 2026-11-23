@@ -102,11 +102,7 @@ button {
 
 .rt-sidebar {
   inline-size: 256px;
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.38) 0%,
-    rgba(255, 255, 255, 0.16) 100%
-  );
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0.16) 100%);
   backdrop-filter: blur(32px) saturate(190%);
   -webkit-backdrop-filter: blur(32px) saturate(190%);
   padding: 20px 14px;
@@ -258,11 +254,7 @@ button {
 }
 
 .rt-nav-link[aria-current="page"] {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.85) 0%,
-    rgba(255, 255, 255, 0.55) 100%
-  );
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.55) 100%);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   color: #1e3320;
@@ -341,18 +333,14 @@ button {
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.40) 0%,
-    rgba(255, 255, 255, 0.18) 100%
-  );
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.18) 100%);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 24px;
   padding: 12px 20px;
   box-shadow:
-    0 14px 36px -8px rgba(22, 45, 28, 0.10),
+    0 14px 36px -8px rgba(22, 45, 28, 0.1),
     inset 0 1.5px 2px rgba(255, 255, 255, 0.95),
     inset 0 0 20px rgba(255, 255, 255, 0.1);
   margin-block-end: 22px;
@@ -393,14 +381,10 @@ button {
 
 /* Glassmorphic Cards, Buttons, Pills, Tags */
 .rt-card {
-  background: linear-gradient(
-    140deg,
-    rgba(255, 255, 255, 0.38) 0%,
-    rgba(255, 255, 255, 0.16) 100%
-  );
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0.16) 100%);
   backdrop-filter: blur(28px) saturate(180%);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.70);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 26px;
   padding: 22px;
   box-shadow:
@@ -425,11 +409,7 @@ button {
 
 /* Specialized Glassmorphic Containers */
 .rt-glass-hero {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.42) 0%,
-    rgba(255, 255, 255, 0.18) 100%
-  );
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.18) 100%);
   backdrop-filter: blur(32px) saturate(190%);
   -webkit-backdrop-filter: blur(32px) saturate(190%);
   border: 1px solid rgba(255, 255, 255, 0.75);
@@ -444,30 +424,22 @@ button {
 }
 
 .rt-glass-stat {
-  background: linear-gradient(
-    140deg,
-    rgba(255, 255, 255, 0.40) 0%,
-    rgba(255, 255, 255, 0.18) 100%
-  );
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.18) 100%);
   backdrop-filter: blur(26px) saturate(180%);
   -webkit-backdrop-filter: blur(26px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 22px;
   padding: 18px 20px;
   box-shadow:
-    0 16px 36px -10px rgba(22, 45, 28, 0.10),
+    0 16px 36px -10px rgba(22, 45, 28, 0.1),
     inset 0 1.5px 2px 0 rgba(255, 255, 255, 0.95),
-    inset 0 0 20px 0 rgba(255, 255, 255, 0.10);
+    inset 0 0 20px 0 rgba(255, 255, 255, 0.1);
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .rt-glass-stat:hover {
   transform: translateY(-2px);
-  background: linear-gradient(
-    140deg,
-    rgba(255, 255, 255, 0.50) 0%,
-    rgba(255, 255, 255, 0.25) 100%
-  );
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.25) 100%);
   border-color: rgba(255, 255, 255, 0.95);
   box-shadow:
     0 22px 45px -8px rgba(22, 45, 28, 0.14),
@@ -541,7 +513,7 @@ button {
 }
 
 .rt-btn.secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.90);
+  background: rgba(255, 255, 255, 0.9);
   transform: translateY(-1px);
   box-shadow:
     0 10px 24px -3px rgba(22, 45, 28, 0.12),
@@ -586,7 +558,7 @@ button {
   align-items: center;
   gap: 6px;
   border: 1px solid rgba(255, 255, 255, 0.75);
-  background: rgba(255, 255, 255, 0.50);
+  background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   padding: 6px 14px;
@@ -674,7 +646,7 @@ progress.rt-progress::-moz-progress-bar {
   padding: 10px 14px;
   border: 1px solid rgba(255, 255, 255, 0.65);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.40);
+  background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   color: var(--ink);
@@ -722,11 +694,7 @@ textarea.rt-control {
 dialog.rt-dialog {
   border: 1px solid rgba(255, 255, 255, 0.85);
   border-radius: 28px;
-  background: linear-gradient(
-    140deg,
-    rgba(255, 255, 255, 0.65) 0%,
-    rgba(255, 255, 255, 0.40) 100%
-  );
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0.4) 100%);
   backdrop-filter: blur(36px) saturate(190%);
   -webkit-backdrop-filter: blur(36px) saturate(190%);
   color: var(--ink);
@@ -777,11 +745,7 @@ dialog.rt-drawer::backdrop {
 .rt-drawer-sheet {
   inline-size: var(--drawer-width);
   block-size: 100svh;
-  background: linear-gradient(
-    145deg,
-    rgba(255, 255, 255, 0.55) 0%,
-    rgba(255, 255, 255, 0.35) 100%
-  );
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0.35) 100%);
   backdrop-filter: blur(32px) saturate(180%);
   -webkit-backdrop-filter: blur(32px) saturate(180%);
   padding: 20px 16px;
@@ -1009,9 +973,23 @@ html {
   position: sticky;
   inset-block-start: 14px;
   z-index: 40;
+  inline-size: 85vw;
+  max-inline-size: 1920px;
   margin-inline: auto;
-  max-inline-size: 1180px;
-  padding-inline: 16px;
+  padding-inline: 0;
+}
+
+.rt-landing-container {
+  inline-size: 85vw;
+  max-inline-size: 1920px;
+  margin-inline: auto;
+}
+
+@media (max-width: 768px) {
+  .rt-landing-header,
+  .rt-landing-container {
+    inline-size: calc(100% - 24px);
+  }
 }
 
 .rt-landing-nav {
@@ -1021,11 +999,7 @@ html {
   gap: 16px;
   padding: 10px 14px 10px 18px;
   border-radius: 9999px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.52) 0%,
-    rgba(255, 255, 255, 0.24) 100%
-  );
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.52) 0%, rgba(255, 255, 255, 0.24) 100%);
   backdrop-filter: blur(30px) saturate(190%);
   -webkit-backdrop-filter: blur(30px) saturate(190%);
   border: 1px solid rgba(255, 255, 255, 0.78);

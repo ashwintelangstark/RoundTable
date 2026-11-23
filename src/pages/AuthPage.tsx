@@ -142,9 +142,9 @@ export function AuthPage() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col justify-center p-4 sm:p-6 lg:p-10">
+    <div className="min-h-dvh flex flex-col justify-center py-6 sm:py-10">
       {/* Subtle Top Return Bar */}
-      <div className="w-full max-w-5xl mx-auto mb-5 flex items-center justify-between gap-3 rt-auth-card-fade">
+      <div className="rt-landing-container mb-5 flex items-center justify-between gap-3 rt-auth-card-fade">
         <Link
           to="/"
           className="rt-pill no-underline hover:bg-white/85 transition-colors inline-flex items-center gap-1.5"
@@ -165,7 +165,7 @@ export function AuthPage() {
         </div>
       </div>
 
-      <div className="w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+      <div className="rt-landing-container grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* Left Glass Brand & 5-Agent Showcase with Fade Entrance */}
         <section className="rt-glass-hero rt-auth-card-fade lg:col-span-6 p-7 sm:p-9 flex flex-col justify-between gap-6">
           <div>

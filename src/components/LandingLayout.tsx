@@ -44,7 +44,7 @@ export function LandingLayout({ title, children }: { title: string; children: Re
       />
 
       {/* Minimalistic Glass Navigation Bar */}
-      <header className="rt-landing-header w-full pt-3.5">
+      <header className="rt-landing-header pt-3.5">
         <nav className="rt-landing-nav" aria-label="Primary navigation">
           <Link to="/" className="flex items-center gap-2.5 no-underline text-[#1c2c1e] shrink-0">
             <div className="rt-brand-badge !w-9 !h-9">
@@ -126,12 +126,10 @@ export function LandingLayout({ title, children }: { title: string; children: Re
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 w-full max-w-[1180px] mx-auto px-4 sm:px-6 pt-10 pb-20 rt-page-enter">
-        {children}
-      </main>
+      <main className="flex-1 rt-landing-container pt-10 pb-20 rt-page-enter">{children}</main>
 
       {/* Minimalistic Glass Footer */}
-      <footer className="w-full max-w-[1180px] mx-auto px-4 sm:px-6 pb-8">
+      <footer className="rt-landing-container pb-8">
         <div className="rt-card !py-5 !px-6 !rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <img
